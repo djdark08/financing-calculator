@@ -93,17 +93,42 @@ The site is static; no API or database is needed. The deployment injects the
 
 ## Screenshots
 
-The calculator's main layout is a two-column control panel and summary card, with a
-second column containing the installment estimate breakdown and a portrait export card
-for the Save Photo feature. The live preview shows the same layout at any screen width.
+The screenshots below were captured from the deployed calculator at
+`https://site-f0478a2ff41c4a889d1b4c5b2086477b.freebuff.page/`. Use them as a visual
+reference for the UI; the app runs exactly the same locally.
 
-![Calculator summary card](calculator-view.png)
+### Calculator UI (with summary card, breakdown table, and Save Photo button)
 
-- The dark header holds the title, subtitle, author, and the quick presets.
-- The left column holds the price/quantity controls, the duration controls, and the
-  synchronized financing charge controls.
-- The right column holds the summary card, the breakdown table, and the
-  “Copy Summary” / “Save Photo” actions.
+![Calculator UI with summary card, breakdown table, and Save Photo button](financing_Calculator_UI.png)
+
+The main layout is a two-column dashboard:
+
+- The dark navy header shows the title, subtitle, author credit, and the quick presets
+  (₱100K/24m, ₱200K/24m, ₱300K/36m, Reset to Defaults).
+- The left column holds three stacked cards: the price/quantity inputs, the
+  installment-duration presets, and the synchronized financing charge controls.
+- The right column holds the monthly installment amount card, the estimates
+  breakdown table, the “Copy Summary” and “Save Photo” actions, and the
+  reconciliation check with the equivalent simple annual rate.
+- The charge-mode banner (“Fixed Monthly Add-on”) is the active anchor so the
+  highlighted card follows the click.
+
+### Portrait summary export card (Save Photo output)
+
+![Portrait summary export card](financing-Card.png)
+
+This is the 540x810 portrait card that the “Save Photo” button renders and downloads.
+It contains the estimate summary with:
+
+- The header purchase price and the monthly installment amount.
+- The duration and total payable on the same line, separated by a dot.
+- The breakdown rows (original price, financing charge, and total repayment).
+- The per-mode rates in an indented list so the user can see which charge mode is
+  active and what each equivalent rate equals.
+
+Both screenshots were taken from the deployed site; they reflect the current,
+fully working build. If you prefer, replace them with your own captures at any
+state or preset.
 
 ## Notes for use
 
