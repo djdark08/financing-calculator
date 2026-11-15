@@ -1120,6 +1120,9 @@
         updateAnchorUI();
         updateTermButtonsUI();
         saveState(); // Persist user edits after every change.
+
+        // Keep the financial card in sync with the live calculator state
+        renderFinancialCard();
       }
 
       // Direction Switcher (Forward vs Reverse)
