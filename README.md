@@ -136,27 +136,19 @@ with your own captures at any state or preset.
 - The portrait export card downloads a PNG sized 540x810 (portrait), ideal for
   sharing on messaging apps.
 
-## Short free URL (GitHub Pages)
+## Short free URL (GitHub Pages) — live
 
-A short, free project URL is available on GitHub Pages at:
+The site has been deployed to GitHub Pages at the short, free URL:
 
 ```
 https://djdark08.github.io/financing-calculator
 ```
 
-This is served from the `main` branch of this repository using the root `index.html`
-(the file I added for GitHub Pages). All calculator assets load from CDNs, so there
-are no local file paths to configure.
+It serves the static calculator from the `main` branch's root `index.html`.
+All calculator assets load from CDNs, so no local file paths are needed.
 
-To enable it, in your GitHub repo:
-
-1. Go to **Settings** → **Pages**.
-2. Under **Build and deployment**, set **Source** to **Deploy from a branch**.
-3. Choose branch **main** and folder **/(root)**.
-4. Click **Save**.
-
-GitHub publishes the site within a few minutes at the URL above. Everything used is
-free (GitHub-hosted Pages is free for public repos).
+- The site is live (HTTP 200, `text/html`).
+- Everything used is free (GitHub-hosted Pages is free for public repos).
 
 ## Note on CDN dependencies
 
