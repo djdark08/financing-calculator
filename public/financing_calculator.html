@@ -34,6 +34,18 @@
     }
   </script>
   <style>
+    /* Financial Card modal (single centered popup) */
+    #financial-card {
+      display: none;
+    }
+    #financial-card.open {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    body.fc-modal-open {
+      overflow: hidden;
+    }
     /* Custom polished range sliders */
     input[type="range"] {
       -webkit-appearance: none;
@@ -84,7 +96,7 @@
     input[type="number"] {
       -moz-appearance: textfield;
     }
-    /* Export card styling for html2canvas capture */
+    /* Highlight summary card styling */
     #export-card {
       background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
     }
@@ -125,6 +137,7 @@
         </button>
       </div>
     </div>
+
   </header>
 
   <!-- Main Workspace -->
@@ -442,19 +455,15 @@
               <h3 class="text-sm font-bold text-slate-900">Installment Estimate Breakdown</h3>
               <p class="text-xs text-slate-500">Purchase Price: <strong id="table-header-price" class="font-mono text-slate-800">₱100,000.00</strong></p>
             </div>
-            <!-- Separate Export Action Buttons -->
+            <!-- Export actions -->
             <div class="flex items-center gap-2">
-              <button type="button" id="copy-text-btn" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white transition cursor-pointer shadow-sm" title="Copy estimate text to clipboard">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
+              <button type="button" id="copy-text-btn" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white transition cursor-pointer shadow-sm" title="Copy the estimate summary text">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
                 <span>Copy Summary</span>
               </button>
-              <button type="button" id="download-photo-btn" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition cursor-pointer shadow-sm" title="Download summary card as portrait photo (PNG)">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <span>Save Photo</span>
+              <button type="button" id="generate-card-btn" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition cursor-pointer shadow-sm" title="Open the financial card image">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                <span>Generate Card</span>
               </button>
             </div>
           </div>
@@ -514,76 +523,23 @@
     </div>
   </main>
 
-  <!-- Hidden Professional Portrait Export Container (Strictly 540x810 px portrait) -->
-  <div id="portrait-export-wrapper" class="fixed -left-[9999px] top-0 pointer-events-none">
-    <div id="portrait-card" style="width: 540px; height: 810px; background: linear-gradient(135deg, #090d16 0%, #111827 50%, #0f172a 100%); padding: 32px; display: flex; flex-direction: column; justify-content: space-between; border: 4px solid #1e293b; border-radius: 24px; font-family: 'Inter', sans-serif; box-sizing: border-box; color: #f8fafc; position: relative; overflow: hidden;">
-      <!-- Subtle background accent glow -->
-      <div style="position: absolute; top: -50px; right: -50px; width: 250px; height: 250px; border-radius: 50%; background: rgba(16, 185, 129, 0.12); filter: blur(40px);"></div>
-      <div style="position: absolute; bottom: -50px; left: -50px; width: 250px; height: 250px; border-radius: 50%; background: rgba(59, 130, 246, 0.1); filter: blur(40px);"></div>
+  <!-- Financial Card Modal (single centered popup with Download / Cancel) -->
+  <div id="financial-card" class="fixed inset-0 z-[60] p-4 overflow-y-auto">
+    <!-- Backdrop -->
+    <div id="financial-card-backdrop" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
 
-      <!-- Card Header -->
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid rgba(255, 255, 255, 0.12); padding-bottom: 16px; z-index: 10;">
-        <div>
-          <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #34d399; margin-bottom: 2px;">Financing Calculator</div>
-          <div style="font-size: 22px; font-weight: 800; letter-spacing: -0.02em; color: #ffffff;">Estimate Summary</div>
-        </div>
-        <div style="background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255, 255, 255, 0.15); padding: 6px 12px; border-radius: 10px; text-align: right;">
-          <div style="font-size: 9px; font-weight: 600; color: #94a3b8; text-transform: uppercase;">Purchase Price</div>
-          <div id="pc-header-price" style="font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700; color: #34d399;">₱310,000.00</div>
-        </div>
+    <!-- Card image + actions -->
+    <div class="relative z-10 w-full max-w-[360px] sm:max-w-[400px] mx-auto my-auto bg-slate-900 rounded-2xl border border-slate-700/60 shadow-2xl overflow-hidden">
+      <div class="flex items-center justify-between px-4 pt-3 pb-2">
+        <span class="text-[11px] font-bold uppercase tracking-widest text-emerald-400">Financial Card</span>
+        <button type="button" id="fc-close-x" class="text-white/60 hover:text-white text-lg leading-none p-1 rounded-lg transition cursor-pointer" title="Close">✕</button>
       </div>
-
-      <!-- Card Body / Highlight Section -->
-      <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 16px; padding: 22px 24px; text-align: center; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); z-index: 10;">
-        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #34d399; margin-bottom: 6px;">Monthly Installment Amount</div>
-        <div id="pc-hero-monthly" style="font-family: 'JetBrains Mono', monospace; font-size: 38px; font-weight: 800; color: #ffffff; letter-spacing: -0.03em; line-height: 1.1;">₱9,611.11</div>
-        <div style="display: flex; justify-content: center; gap: 16px; margin-top: 14px; pt: 14px; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 12px; color: #94a3b8;">
-          <span>Duration: <strong id="pc-hero-months" style="color: #f8fafc;">36 months</strong></span>
-          <span>•</span>
-          <span>Total Payable: <strong id="pc-hero-total" style="color: #34d399; font-family: 'JetBrains Mono', monospace;">₱346,000.00</strong></span>
-        </div>
+      <div class="px-4">
+        <img id="fc-preview" alt="Financial card preview" class="w-full h-auto max-h-[68vh] object-contain rounded-xl border border-slate-700/60 bg-slate-950" />
       </div>
-
-      <!-- Financial Details Breakdown List -->
-      <div style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; z-index: 10;">
-        <div style="display: flex; justify-content: space-between; font-size: 13px;">
-          <span style="color: #94a3b8; font-weight: 500;">Original purchase price:</span>
-          <span id="pc-orig-price" style="font-family: 'JetBrains Mono', monospace; font-weight: 600; color: #f8fafc;">₱310,000.00</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; font-size: 13px;">
-          <span style="color: #94a3b8; font-weight: 500;">Additional financing charge:</span>
-          <span id="pc-charge-amount" style="font-family: 'JetBrains Mono', monospace; font-weight: 600; color: #fbbf24;">₱36,000.00</span>
-        </div>
-        
-        <div style="padding-left: 12px; border-left: 2px solid rgba(16, 185, 129, 0.5); display: flex; flex-direction: column; gap: 4px; margin: 2px 0; font-size: 12px; color: #cbd5e1;">
-          <div style="display: flex; justify-content: space-between;">
-            <span>• Flat Rate:</span>
-            <span id="pc-flat-rate" style="font-family: 'JetBrains Mono', monospace; font-weight: 600;">11.61% over entire term</span>
-          </div>
-          <div style="display: flex; justify-content: space-between;">
-            <span>• Monthly Rate:</span>
-            <span id="pc-monthly-rate" style="font-family: 'JetBrains Mono', monospace; font-weight: 600;">0.323% per month</span>
-          </div>
-          <div style="display: flex; justify-content: space-between;">
-            <span>• Annual Rate (APR):</span>
-            <span id="pc-annual-rate" style="font-family: 'JetBrains Mono', monospace; font-weight: 600;">3.87% per year</span>
-          </div>
-          <div style="display: flex; justify-content: space-between;">
-            <span>• Monthly Add-on:</span>
-            <span id="pc-monthly-addon" style="font-family: 'JetBrains Mono', monospace; font-weight: 600;">₱1,000.00 per month</span>
-          </div>
-        </div>
-
-        <div style="display: flex; justify-content: space-between; font-size: 13px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 14px;">
-          <span style="color: #94a3b8; font-weight: 500;">Total repayment:</span>
-          <span id="pc-total-repayment" style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #34d399;">₱346,000.00</span>
-        </div>
-      </div>
-
-      <!-- Card Footer -->
-      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255, 255, 255, 0.12); padding-top: 14px; font-size: 11px; color: #94a3b8; z-index: 10;">
-        <span>Philippine Peso (₱) Add-on Modeler</span>
-        <span style="font-weight: 600; color: #f8fafc;">Created by Lloyd Agonia</span>
+      <div class="p-4 flex gap-3">
+        <button type="button" id="fc-download-btn" class="flex-1 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold transition shadow-sm cursor-pointer">Download</button>
+        <button type="button" id="fc-cancel-btn" class="flex-1 px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white text-sm font-semibold transition cursor-pointer">Cancel</button>
       </div>
     </div>
   </div>
@@ -599,9 +555,6 @@
     <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">✓</span>
     <span id="toast-message">Summary copied to clipboard!</span>
   </div>
-
-  <!-- html2canvas library for downloading card as photo -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <script>
     /**
@@ -731,10 +684,7 @@
         resetDefaultsBtn: document.getElementById('reset-defaults-btn'),
         resetRateBtn: document.getElementById('reset-rate-btn'),
         snapExact16800: document.getElementById('snap-exact-16800'),
-        exportMenuBtn: document.getElementById('export-menu-btn'),
-        exportDropdown: document.getElementById('export-dropdown'),
         copyTextBtn: document.getElementById('copy-text-btn'),
-        downloadPhotoBtn: document.getElementById('download-photo-btn'),
         exportCard: document.getElementById('export-card'),
         toast: document.getElementById('toast'),
         toastMessage: document.getElementById('toast-message'),
@@ -977,6 +927,7 @@
         updateAnchorUI();
         updateTermButtonsUI();
         saveState(); // Persist user edits after every change.
+
       }
 
       // Direction Switcher (Forward vs Reverse)
@@ -1197,7 +1148,7 @@
       });
 
       // Copy Formatted Summary as Text
-      els.copyTextBtn.addEventListener('click', () => {
+      els.copyTextBtn.addEventListener('click', async () => {
         const totalRepayment = state.principal + state.totalCharge;
         const monthlyInstallment = totalRepayment / state.months;
         const rateStr = roundToTwo(state.flatRatePct).toFixed(2);
@@ -1224,91 +1175,355 @@
           `Created by Lloyd Agonia`,
         ].join('\n');
 
-        const textarea = document.createElement('textarea');
-        textarea.value = summaryText;
-        textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
-        document.body.appendChild(textarea);
-        textarea.select();
+        let copied = false;
         try {
-          document.execCommand('copy');
-          showToast('Detailed summary copied to clipboard!');
+          if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+            await navigator.clipboard.writeText(summaryText);
+            copied = true;
+          }
         } catch (err) {
-          showToast('Unable to copy summary.');
+          copied = false;
         }
-        document.body.removeChild(textarea);
+
+        if (!copied) {
+          // Fallback for browsers without the async clipboard API.
+          const textarea = document.createElement('textarea');
+          textarea.value = summaryText;
+          textarea.style.position = 'fixed';
+          textarea.style.opacity = '0';
+          document.body.appendChild(textarea);
+          textarea.select();
+          try {
+            copied = document.execCommand('copy');
+          } catch (err) {
+            copied = false;
+          }
+          document.body.removeChild(textarea);
+        }
+
+        showToast(copied ? 'Detailed summary copied to clipboard!' : 'Unable to copy summary.');
       });
 
-      // Download Summary Card as Photo (PNG) using html2canvas
-      els.downloadPhotoBtn.addEventListener('click', () => {
-        showToast('Generating portrait summary photo...');
-        
-        // Populate hidden portrait card with live values
+      // --- Portrait summary image (drawn directly on a canvas) ---
+      // No external library is used, so the export works instantly and offline.
+      function drawPortraitCard(ctx) {
         const totalRepayment = state.principal + state.totalCharge;
-        const monthlyInstallment = totalRepayment / state.months;
+        const monthlyInstallment = totalRepayment / Math.max(1, state.months);
         const rateStr = roundToTwo(state.flatRatePct).toFixed(2);
         const monthlyRateStr = roundToThree(state.monthlyRatePct).toFixed(3);
         const annualRateStr = roundToTwo(state.annualRatePct).toFixed(2);
 
-        document.getElementById('pc-header-price').textContent = formatPHP(state.principal);
-        document.getElementById('pc-hero-monthly').textContent = formatPHP(monthlyInstallment);
-        document.getElementById('pc-hero-months').textContent = `${state.months} months`;
-        document.getElementById('pc-hero-total').textContent = formatPHP(totalRepayment);
-        document.getElementById('pc-orig-price').textContent = formatPHP(state.principal);
-        document.getElementById('pc-charge-amount').textContent = formatPHP(state.totalCharge);
-        document.getElementById('pc-flat-rate').textContent = `${rateStr}% over entire term`;
-        document.getElementById('pc-monthly-rate').textContent = `${monthlyRateStr}% per month`;
-        document.getElementById('pc-annual-rate').textContent = `${annualRateStr}% per year`;
-        document.getElementById('pc-monthly-addon').textContent = `${formatPHP(state.monthlyAddon)} per month`;
-        document.getElementById('pc-total-repayment').textContent = formatPHP(totalRepayment);
+        const W = 540;
+        const H = 810;
+        const PAD = 32;
+        const contentW = W - PAD * 2;
+        const sans = (weight, size) => weight + ' ' + size + 'px Inter, system-ui, -apple-system, sans-serif';
+        const mono = (weight, size) => weight + ' ' + size + 'px "JetBrains Mono", ui-monospace, monospace';
 
-        const portraitCardEl = document.getElementById('portrait-card');        
-        html2canvas(portraitCardEl, {
-          scale: 2,
-          useCORS: true,
-          backgroundColor: '#090d16',
-          width: 540,
-          height: 810,
-        }).then((canvas) => {
-          // Convert canvas to a real binary PNG (Blob). iOS Safari refuses to
-          // download plain data: URLs and <a download>, so we use a Blob URL
-          // and either (a) hand it to the native share/save sheet, or (b) the
-          // desktop <a download> fallback.
-          canvas.toBlob((blob) => {
-            if (!blob) {
-              showToast('Could not generate image.');
-              return;
-            }
-            const url = URL.createObjectURL(blob);
-            const name = `financing-summary-${Math.round(state.principal)}-${state.months}m.png`;
+        function roundRect(x, y, w, h, r) {
+          ctx.beginPath();
+          ctx.moveTo(x + r, y);
+          ctx.arcTo(x + w, y, x + w, y + h, r);
+          ctx.arcTo(x + w, y + h, x, y + h, r);
+          ctx.arcTo(x, y + h, x, y, r);
+          ctx.arcTo(x, y, x + w, y, r);
+          ctx.closePath();
+        }
 
-            // On iOS the Web Share API exposes navigator.share with files. That
-            // is the only reliable way to hand a PNG to the Files app. If the
-            // platform has no share API, fall back to <a download>.
-            const hasShare = typeof navigator.share === 'function' && navigator.canShare({
-              files: [{ uri: url, type: 'image/png', name }]
-            });
+        function panel(x, y, w, h, fill, stroke, r) {
+          ctx.fillStyle = fill;
+          roundRect(x, y, w, h, r);
+          ctx.fill();
+          if (stroke) {
+            ctx.strokeStyle = stroke;
+            ctx.lineWidth = 1;
+            roundRect(x, y, w, h, r);
+            ctx.stroke();
+          }
+        }
 
-            if (hasShare) {
-              // iOS native share/save sheet (user taps Save to Files to store it).
-              try {
-                navigator.share({ files: [{ uri: url, type: 'image/png', name }] });
-              } catch (err) {
-                // Cancelled by the user (e.g. back button) or unavailable.
-              }
-            } else {
-              const link = document.createElement('a');
-              link.download = name;
-              link.href = url;
-              link.click();
-              URL.revokeObjectURL(url);
-              showToast('Portrait summary photo downloaded successfully!');
-            }
-          }, 'image/png');
-        }).catch((err) => {
-          console.error(err);
-          showToast('Could not generate image.');
+        function hLine(x1, x2, y, color) {
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(x1, y);
+          ctx.lineTo(x2, y);
+          ctx.stroke();
+        }
+
+        function centered(segments, centerX, y) {
+          const gap = 6;
+          const widths = segments.map((s) => {
+            ctx.font = s.font;
+            return ctx.measureText(s.text).width;
+          });
+          const total = widths.reduce((a, b) => a + b, 0) + gap * (segments.length - 1);
+          let x = centerX - total / 2;
+          segments.forEach((s, i) => {
+            ctx.font = s.font;
+            ctx.fillStyle = s.color;
+            ctx.textAlign = 'left';
+            ctx.fillText(s.text, x, y);
+            x += widths[i] + gap;
+          });
+        }
+
+        // Background
+        const bg = ctx.createLinearGradient(0, 0, W, H);
+        bg.addColorStop(0, '#090d16');
+        bg.addColorStop(0.5, '#111827');
+        bg.addColorStop(1, '#0f172a');
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, W, H);
+
+        // Soft accent glows (radial gradients, no blur filters)
+        const glow = (cx, cy, color) => {
+          const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, 170);
+          g.addColorStop(0, color);
+          g.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = g;
+          ctx.beginPath();
+          ctx.arc(cx, cy, 170, 0, Math.PI * 2);
+          ctx.fill();
+        };
+        glow(W - 30, 20, 'rgba(16,185,129,0.20)');
+        glow(30, H - 30, 'rgba(59,130,246,0.16)');
+
+        // Card outline
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 4;
+        roundRect(2, 2, W - 4, H - 4, 24);
+        ctx.stroke();
+
+        ctx.textBaseline = 'alphabetic';
+        ctx.textAlign = 'left';
+
+        // ---- Header
+        let y = PAD;
+        ctx.fillStyle = '#34d399';
+        ctx.font = sans(700, 11);
+        ctx.letterSpacing = '1.2px';
+        ctx.fillText('FINANCING CALCULATOR', PAD, y + 10);
+        ctx.letterSpacing = '0px';
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = sans(800, 22);
+        ctx.fillText('Estimate Summary', PAD, y + 38);
+
+        const badgeW = 152;
+        const badgeH = 46;
+        const bx = W - PAD - badgeW;
+        panel(bx, y - 4, badgeW, badgeH, 'rgba(30,41,59,0.85)', 'rgba(255,255,255,0.15)', 10);
+
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = sans(600, 9);
+        ctx.fillText('PURCHASE PRICE', bx + badgeW - 12, y + 12);
+        ctx.fillStyle = '#34d399';
+        ctx.font = mono(700, 15);
+        ctx.fillText(formatPHP(state.principal), bx + badgeW - 12, y + 33);
+        ctx.textAlign = 'left';
+
+        let cursor = y + 58;
+        hLine(PAD, W - PAD, cursor, 'rgba(255,255,255,0.12)');
+
+        // ---- Monthly installment hero
+        const heroY = cursor + 26;
+        const heroH = 160;
+        panel(PAD, heroY, contentW, heroH, 'rgba(15,23,42,0.9)', 'rgba(16,185,129,0.35)', 16);
+
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#34d399';
+        ctx.font = sans(700, 11);
+        ctx.letterSpacing = '1.4px';
+        ctx.fillText('MONTHLY INSTALLMENT AMOUNT', W / 2, heroY + 32);
+        ctx.letterSpacing = '0px';
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = mono(800, 38);
+        ctx.fillText(formatPHP(monthlyInstallment), W / 2, heroY + 82);
+
+        hLine(PAD + 24, W - PAD - 24, heroY + 104, 'rgba(255,255,255,0.08)');
+
+        centered([
+          { text: 'Duration:', font: sans(400, 12), color: '#94a3b8' },
+          { text: state.months + ' months', font: sans(700, 12), color: '#f8fafc' },
+          { text: '•', font: sans(400, 12), color: '#64748b' },
+          { text: 'Total Payable:', font: sans(400, 12), color: '#94a3b8' },
+          { text: formatPHP(totalRepayment), font: mono(700, 12), color: '#34d399' },
+        ], W / 2, heroY + 134);
+        ctx.textAlign = 'left';
+
+        // ---- Breakdown
+        const detY = heroY + heroH + 26;
+        const detH = 268;
+        panel(PAD, detY, contentW, detH, 'rgba(30,41,59,0.45)', 'rgba(255,255,255,0.08)', 16);
+
+        const rowX = PAD + 20;
+        const rowRight = W - PAD - 20;
+        let ry = detY + 34;
+
+        const detailRow = (label, value, yPos, amber) => {
+          ctx.textAlign = 'left';
+          ctx.font = sans(400, 13);
+          ctx.fillStyle = '#94a3b8';
+          ctx.fillText(label, rowX, yPos);
+          ctx.textAlign = 'right';
+          ctx.font = mono(600, 13);
+          ctx.fillStyle = amber ? '#fbbf24' : '#f8fafc';
+          ctx.fillText(value, rowRight, yPos);
+          ctx.textAlign = 'left';
+        };
+
+        detailRow('Original purchase price', formatPHP(state.principal), ry, false);
+        ry += 28;
+        detailRow('Additional financing charge', formatPHP(state.totalCharge), ry, true);
+
+        // Rate detail block with an accent border
+        const subX = rowX + 14;
+        const subRows = [
+          ['• Flat Rate', rateStr + '% over entire term'],
+          ['• Monthly Rate', monthlyRateStr + '% per month'],
+          ['• Annual Rate (APR)', annualRateStr + '% per year'],
+          ['• Monthly Add-on', formatPHP(state.monthlyAddon) + ' per month'],
+        ];
+        const subTop = ry + 16;
+        ctx.strokeStyle = 'rgba(16,185,129,0.5)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(rowX, subTop);
+        ctx.lineTo(rowX, subTop + (subRows.length - 1) * 20 + 8);
+        ctx.stroke();
+
+        subRows.forEach((row, i) => {
+          const yy = subTop + 8 + i * 20;
+          ctx.textAlign = 'left';
+          ctx.font = sans(400, 11.5);
+          ctx.fillStyle = '#cbd5e1';
+          ctx.fillText(row[0], subX, yy);
+          ctx.textAlign = 'right';
+          ctx.font = mono(600, 11.5);
+          ctx.fillStyle = '#e2e8f0';
+          ctx.fillText(row[1], rowRight, yy);
+          ctx.textAlign = 'left';
         });
+
+        ry = subTop + (subRows.length - 1) * 20 + 40;
+        hLine(rowX, rowRight, ry, 'rgba(255,255,255,0.08)');
+
+        ctx.textAlign = 'left';
+        ctx.font = sans(400, 13);
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillText('Total repayment', rowX, ry + 32);
+        ctx.textAlign = 'right';
+        ctx.font = mono(700, 15);
+        ctx.fillStyle = '#34d399';
+        ctx.fillText(formatPHP(totalRepayment), rowRight, ry + 32);
+        ctx.textAlign = 'left';
+
+        // ---- Footer
+        const footY = H - 66;
+        hLine(PAD, W - PAD, footY, 'rgba(255,255,255,0.12)');
+        ctx.font = sans(400, 11);
+        ctx.fillStyle = '#94a3b8';
+        ctx.textAlign = 'left';
+        ctx.fillText('Philippine Peso (₱) Add-on Modeler', PAD, footY + 26);
+        ctx.textAlign = 'right';
+        ctx.font = sans(600, 11);
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillText('Created by Lloyd Agonia', W - PAD, footY + 26);
+        ctx.textAlign = 'left';
+      }
+
+      function photoFileName() {
+        const d = new Date();
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `Financing-Summary-${yyyy}-${mm}-${dd}.png`;
+      }
+
+      // --- Financial Card modal: card image preview + Download / Cancel ---
+      const fcModal = document.getElementById('financial-card');
+      const fcBackdrop = document.getElementById('financial-card-backdrop');
+      const fcCloseX = document.getElementById('fc-close-x');
+      const fcCancelBtn = document.getElementById('fc-cancel-btn');
+      const fcDownloadBtn = document.getElementById('fc-download-btn');
+      const fcPreview = document.getElementById('fc-preview');
+      const generateCardBtn = document.getElementById('generate-card-btn');
+
+      let cardImageBlob = null;
+      let cardImageUrl = null;
+
+      function buildCardImage() {
+        const scale = 2;
+        const canvas = document.createElement('canvas');
+        canvas.width = 540 * scale;
+        canvas.height = 810 * scale;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return null;
+        ctx.scale(scale, scale);
+        drawPortraitCard(ctx);
+        return canvas;
+      }
+
+      function openFinancialCard() {
+        const canvas = buildCardImage();
+        if (!canvas) {
+          showToast('Could not generate the card image.');
+          return;
+        }
+
+        if (cardImageUrl) URL.revokeObjectURL(cardImageUrl);
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            showToast('Could not generate the card image.');
+            return;
+          }
+          cardImageBlob = blob;
+          cardImageUrl = URL.createObjectURL(blob);
+          if (fcPreview) fcPreview.src = cardImageUrl;
+        }, 'image/png');
+
+        fcModal.classList.add('open');
+        document.body.classList.add('fc-modal-open');
+      }
+
+      function closeFinancialCard() {
+        fcModal.classList.remove('open');
+        document.body.classList.remove('fc-modal-open');
+      }
+
+      function downloadFinancialCard() {
+        if (!cardImageBlob) return;
+        const name = photoFileName();
+        const url = URL.createObjectURL(cardImageBlob);
+        const link = document.createElement('a');
+        link.download = name;
+        link.href = url;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 1500);
+        showToast('Saved ' + name);
+        closeFinancialCard();
+      }
+
+      if (generateCardBtn) {
+        generateCardBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openFinancialCard();
+        });
+      }
+      if (fcCloseX) fcCloseX.addEventListener('click', closeFinancialCard);
+      if (fcCancelBtn) fcCancelBtn.addEventListener('click', closeFinancialCard);
+      if (fcBackdrop) fcBackdrop.addEventListener('click', closeFinancialCard);
+      if (fcDownloadBtn) fcDownloadBtn.addEventListener('click', downloadFinancialCard);
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && fcModal && fcModal.classList.contains('open')) {
+          closeFinancialCard();
+        }
       });
 
       // Initialize Calculator on Load

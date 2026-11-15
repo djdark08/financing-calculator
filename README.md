@@ -27,7 +27,7 @@ file, open it in any modern browser, and it works. It was built from the attache
 - Installment estimate breakdown table with a reconciliation check and an
   equivalent simple annual rate.
 - Copy Summary: copies a text summary of the estimate to the clipboard.
-- Save Photo: renders the 540x810 portrait summary card to a PNG and downloads it.
+- Generate Card: renders the 540x810 portrait summary card and opens it in a popup with Download and Cancel actions.
 
 ## Run it locally
 
@@ -48,7 +48,6 @@ The HTML file also references external resources that must be reachable from the
 browser:
 
 - Tailwind CSS: https://cdn.tailwindcss.com
-- html2canvas: https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js
 - Google Fonts (Inter and JetBrains Mono): https://fonts.googleapis.com / fonts.gstatic.com
 
 These work normally when you have internet access. There is no backend, database,
@@ -97,9 +96,9 @@ The screenshots below are stored in the `images/` folder at the root of this
 repository. Use them as a visual reference for the UI; the app runs exactly the
 same locally.
 
-### Calculator UI (with summary card, breakdown table, and Save Photo button)
+### Calculator UI (with summary card, breakdown table, and Copy Summary / Generate Card actions)
 
-![Calculator UI with summary card, breakdown table, and Save Photo button](images/financing_Calculator_UI.png)
+![Calculator UI with summary card, breakdown table, and Copy Summary / Generate Card actions](images/financing_Calculator_UI.png)
 
 The main layout is a two-column dashboard:
 
@@ -108,16 +107,16 @@ The main layout is a two-column dashboard:
 - The left column holds three stacked cards: the price/quantity inputs, the
   installment-duration presets, and the synchronized financing charge controls.
 - The right column holds the monthly installment amount card, the estimates
-  breakdown table, the “Copy Summary” and “Save Photo” actions, and the
+  breakdown table, the “Copy Summary” and “Generate Card” actions, and the
   reconciliation check with the equivalent simple annual rate.
 - The charge-mode banner (“Fixed Monthly Add-on”) is the active anchor so the
   highlighted card follows the click.
 
-### Portrait summary export card (Save Photo output)
+### Portrait summary export card (Generate Card output)
 
 ![Portrait summary export card](images/financing-Card.png)
 
-This is the 540x810 portrait card that the “Save Photo” button renders and downloads.
+This is the 540x810 portrait card that “Generate Card” shows in the popup; Download saves it as a PNG.
 It contains the estimate summary with:
 
 - The header purchase price and the monthly installment amount.
@@ -152,7 +151,8 @@ All calculator assets load from CDNs, so no local file paths are needed.
 
 ## Note on CDN dependencies
 
-All three external resources (Tailwind CSS, html2canvas, Google Fonts) are loaded
-from their public CDN URLs. If you need the app to work with no network access, you
+Both external resources (Tailwind CSS and Google Fonts) are loaded
+from their public CDN URLs. The financial card PNG is drawn with the browser's
+Canvas API, so image export needs no extra library. If you need the app to work with no network access, you
 must download those assets and serve them locally, or inline them into this file.
 
