@@ -34,6 +34,77 @@
     }
   </script>
   <style>
+    /* Financial Card overlay --- */
+    #financial-card {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      pointer-events: none;
+    }
+    #financial-card.open {
+      display: block;
+    }
+    #financial-card .financial-card-overlay {
+      display: block;
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      pointer-events: none;
+    }
+    #financial-card .financial-card-overlay::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(2px);
+    }
+    #financial-card .financial-card-overlay > *,
+    #financial-card .financial-card-sheet > * {
+      pointer-events: auto;
+    }
+    /* Mobile bottom sheet */
+    #financial-card-sheet {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 51;
+      pointer-events: none;
+      max-height: 88vh;
+      border-top-left-radius: 24px;
+      border-top-right-radius: 24px;
+      box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.25);
+    }
+    #financial-card.open #financial-card-sheet,
+    #financial-card.open #financial-card-panel {
+      display: block;
+    }
+    #financial-card-panel {
+      display: none;
+      position: fixed;
+      right: 6px;
+      top: 24px;
+      bottom: 24px;
+      z-index: 51;
+      pointer-events: none;
+      max-width: 420px;
+      border-top-right-radius: 16px;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.28);
+    }
+    #financial-card.open #financial-card-panel {
+      display: block;
+    }
+    /* Backdrop clicks close */
+    #financial-card .bg-black/40 {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(2px);
+      z-index: 40;
+    }
+
     /* Custom polished range sliders */
     input[type="range"] {
       -webkit-appearance: none;
@@ -122,6 +193,18 @@
         </button>
         <button type="button" id="reset-defaults-btn" class="px-2 py-1.5 rounded-lg text-xs font-medium bg-slate-700 hover:bg-slate-600 text-slate-200 border border-slate-600 transition cursor-pointer" title="Reset all inputs to defaults">
           Reset to Defaults
+        </button>
+      </div>
+    </div>
+
+    <!-- Financial Card Trigger (desktop right sidebar / mobile bottom sheet) -->
+    <div class="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 lg:px-8 pt-3">
+      <div class="flex items-center gap-2">
+        <button type="button" id="financial-card-btn" class="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/60 transition cursor-pointer shadow-sm" title="Financial card preview">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <span id="financial-card-label">Financial Card</span>
         </button>
       </div>
     </div>
@@ -514,76 +597,130 @@
     </div>
   </main>
 
-  <!-- Hidden Professional Portrait Export Container (Strictly 540x810 px portrait) -->
-  <div id="portrait-export-wrapper" class="fixed -left-[9999px] top-0 pointer-events-none">
-    <div id="portrait-card" style="width: 540px; height: 810px; background: linear-gradient(135deg, #090d16 0%, #111827 50%, #0f172a 100%); padding: 32px; display: flex; flex-direction: column; justify-content: space-between; border: 4px solid #1e293b; border-radius: 24px; font-family: 'Inter', sans-serif; box-sizing: border-box; color: #f8fafc; position: relative; overflow: hidden;">
-      <!-- Subtle background accent glow -->
-      <div style="position: absolute; top: -50px; right: -50px; width: 250px; height: 250px; border-radius: 50%; background: rgba(16, 185, 129, 0.12); filter: blur(40px);"></div>
-      <div style="position: absolute; bottom: -50px; left: -50px; width: 250px; height: 250px; border-radius: 50%; background: rgba(59, 130, 246, 0.1); filter: blur(40px);"></div>
+  <!-- Financial Card Overlay (preview right-side desktop / bottom sheet mobile) -->
+  <div id="financial-card" class="fixed inset-0 z-50 pointer-events-none">
+    <!-- Backdrop (closes card on click) -->
+    <div class="absolute inset-0 bg-black/40" onclick="document.getElementById('financial-card').classList.remove('open'); document.getElementById('financial-card-btn').classList.remove('bg-emerald-500/20', 'border-emerald-500');"></div>
 
-      <!-- Card Header -->
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid rgba(255, 255, 255, 0.12); padding-bottom: 16px; z-index: 10;">
-        <div>
-          <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #34d399; margin-bottom: 2px;">Financing Calculator</div>
-          <div style="font-size: 22px; font-weight: 800; letter-spacing: -0.02em; color: #ffffff;">Estimate Summary</div>
+    <!-- Desktop side panel (right) -->
+    <div id="financial-card-panel" class="hidden lg:flex lg:flex-row absolute right-6 top-24 w-[420px] max-w-[90vw] bg-slate-900 text-white rounded-2xl border border-slate-700/60 shadow-2xl overflow-hidden pointer-events-auto">
+      <!-- Card body -->
+      <div class="flex-1 p-5 sm:p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-bold text-white tracking-tight">Financial Card</h3>
+          <button type="button" id="financial-card-close" class="text-white/60 hover:text-white text-lg p-1 rounded-lg transition" title="Close">✕</button>
         </div>
-        <div style="background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255, 255, 255, 0.15); padding: 6px 12px; border-radius: 10px; text-align: right;">
-          <div style="font-size: 9px; font-weight: 600; color: #94a3b8; text-transform: uppercase;">Purchase Price</div>
-          <div id="pc-header-price" style="font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700; color: #34d399;">₱310,000.00</div>
+        <p class="text-xs text-slate-400">Estimate Summary</p>
+
+        <div class="bg-slate-800 rounded-xl p-4 space-y-3 border border-slate-700/60">
+          <div class="flex items-baseline gap-3">
+            <span class="text-3xl font-extrabold text-white" id="fc-hero-monthly">₱0.00</span>
+            <span class="text-sm text-slate-400">/ month</span>
+          </div>
+          <div class="flex items-baseline gap-2 text-sm text-slate-300">
+            <span id="fc-hero-total" class="font-mono font-bold text-emerald-400">₱0.00</span>
+            <span class="text-slate-400">total payable</span>
+          </div>
+          <div class="flex items-center gap-2 text-xs text-slate-400">
+            <span id="fc-hero-months" class="font-mono">24 months</span>
+            <span class="text-slate-500">•</span>
+            <span>Duration</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 border-t border-slate-700/60 pt-3">
+          <div class="bg-slate-800/60 rounded-lg p-3">
+            <div class="text-[11px] text-slate-400">Principal</div>
+            <div class="font-mono font-bold text-white" id="fc-principal">₱0.00</div>
+          </div>
+          <div class="bg-slate-800/60 rounded-lg p-3">
+            <div class="text-[11px] text-slate-400">Financing charge</div>
+            <div class="font-mono font-bold text-amber-400" id="fc-total-charge">₱0.00</div>
+          </div>
+        </div>
+
+        <div class="border-t border-slate-700/60 pt-3 space-y-2 text-sm text-slate-300">
+          <div class="flex justify-between"><span class="text-slate-400">Flat Rate</span><span id="fc-flat-rate" class="font-mono text-white"></span></div>
+          <div class="flex justify-between"><span class="text-slate-400">APR (Simple)</span><span id="fc-annual-rate" class="font-mono text-white"></span></div>
+          <div class="flex justify-between"><span class="text-slate-400">Monthly add-on</span><span id="fc-monthly-addon" class="font-mono text-white"></span></div>
+          <div class="flex justify-between"><span class="text-slate-400">Duration</span><span id="fc-months" class="font-mono text-white"></span></div>
         </div>
       </div>
 
-      <!-- Card Body / Highlight Section -->
-      <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 16px; padding: 22px 24px; text-align: center; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); z-index: 10;">
-        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #34d399; margin-bottom: 6px;">Monthly Installment Amount</div>
-        <div id="pc-hero-monthly" style="font-family: 'JetBrains Mono', monospace; font-size: 38px; font-weight: 800; color: #ffffff; letter-spacing: -0.03em; line-height: 1.1;">₱9,611.11</div>
-        <div style="display: flex; justify-content: center; gap: 16px; margin-top: 14px; pt: 14px; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 12px; color: #94a3b8;">
-          <span>Duration: <strong id="pc-hero-months" style="color: #f8fafc;">36 months</strong></span>
-          <span>•</span>
-          <span>Total Payable: <strong id="pc-hero-total" style="color: #34d399; font-family: 'JetBrains Mono', monospace;">₱346,000.00</strong></span>
+      <!-- Right decorative panel -->
+      <div class="hidden lg:flex w-24 bg-slate-800/40 flex-shrink-0 items-center justify-center">
+        <div class="w-12 h-12 rounded-full bg-emerald-500/15 flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
         </div>
       </div>
 
-      <!-- Financial Details Breakdown List -->
-      <div style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; z-index: 10;">
-        <div style="display: flex; justify-content: space-between; font-size: 13px;">
-          <span style="color: #94a3b8; font-weight: 500;">Original purchase price:</span>
-          <span id="pc-orig-price" style="font-family: 'JetBrains Mono', monospace; font-weight: 600; color: #f8fafc;">₱310,000.00</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; font-size: 13px;">
-          <span style="color: #94a3b8; font-weight: 500;">Additional financing charge:</span>
-          <span id="pc-charge-amount" style="font-family: 'JetBrains Mono', monospace; font-weight: 600; color: #fbbf24;">₱36,000.00</span>
-        </div>
-        
-        <div style="padding-left: 12px; border-left: 2px solid rgba(16, 185, 129, 0.5); display: flex; flex-direction: column; gap: 4px; margin: 2px 0; font-size: 12px; color: #cbd5e1;">
-          <div style="display: flex; justify-content: space-between;">
-            <span>• Flat Rate:</span>
-            <span id="pc-flat-rate" style="font-family: 'JetBrains Mono', monospace; font-weight: 600;">11.61% over entire term</span>
-          </div>
-          <div style="display: flex; justify-content: space-between;">
-            <span>• Monthly Rate:</span>
-            <span id="pc-monthly-rate" style="font-family: 'JetBrains Mono', monospace; font-weight: 600;">0.323% per month</span>
-          </div>
-          <div style="display: flex; justify-content: space-between;">
-            <span>• Annual Rate (APR):</span>
-            <span id="pc-annual-rate" style="font-family: 'JetBrains Mono', monospace; font-weight: 600;">3.87% per year</span>
-          </div>
-          <div style="display: flex; justify-content: space-between;">
-            <span>• Monthly Add-on:</span>
-            <span id="pc-monthly-addon" style="font-family: 'JetBrains Mono', monospace; font-weight: 600;">₱1,000.00 per month</span>
-          </div>
-        </div>
-
-        <div style="display: flex; justify-content: space-between; font-size: 13px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 14px;">
-          <span style="color: #94a3b8; font-weight: 500;">Total repayment:</span>
-          <span id="pc-total-repayment" style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #34d399;">₱346,000.00</span>
-        </div>
+      <!-- Download action -->
+      <div class="flex-shrink-0 p-4 w-40 bg-slate-800/40 rounded-xl border border-slate-700/40 flex flex-col items-center justify-center gap-2">
+        <button type="button" id="fc-download-btn-desktop" class="w-full flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition shadow-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          Download card
+        </button>
+        <p class="text-[10px] text-slate-400">PNG export</p>
       </div>
+    </div>
 
-      <!-- Card Footer -->
-      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255, 255, 255, 0.12); padding-top: 14px; font-size: 11px; color: #94a3b8; z-index: 10;">
-        <span>Philippine Peso (₱) Add-on Modeler</span>
-        <span style="font-weight: 600; color: #f8fafc;">Created by Lloyd Agonia</span>
+    <!-- Mobile bottom sheet (full width) -->
+    <div id="financial-card-sheet" class="lg:hidden fixed inset-0 z-50 pointer-events-none">
+      <div class="absolute inset-0 bg-black/40" onclick="document.getElementById('financial-card').classList.remove('open'); document.getElementById('financial-card-btn').classList.remove('bg-emerald-500/20', 'border-emerald-500');"></div>
+      <div class="absolute bottom-0 left-0 right-0 bg-slate-900 rounded-t-2xl shadow-2xl border-t border-slate-700/60 p-5 sm:p-6 max-h-[88vh] overflow-y-auto pointer-events-auto">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-lg font-bold text-white tracking-tight">Financial Card</h3>
+          <button type="button" id="financial-card-sheet-close" class="text-white/60 hover:text-white text-xl p-1 rounded-lg transition" title="Close">✕</button>
+        </div>
+        <p class="text-xs text-slate-400">Estimate Summary</p>
+
+        <div class="bg-slate-800 rounded-xl p-4 space-y-3 border border-slate-700/60">
+          <div class="flex items-baseline gap-3">
+            <span class="text-2xl font-extrabold text-white" id="fcs-hero-monthly">₱0.00</span>
+            <span class="text-sm text-slate-400">/ month</span>
+          </div>
+          <div class="flex items-baseline gap-2 text-sm text-slate-300">
+            <span id="fcs-hero-total" class="font-mono font-bold text-emerald-400">₱0.00</span>
+            <span class="text-slate-400">total payable</span>
+          </div>
+          <div class="flex items-center gap-2 text-xs text-slate-400">
+            <span id="fcs-hero-months" class="font-mono">24 months</span>
+            <span class="text-slate-500">•</span>
+            <span>Duration</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 border-t border-slate-700/60 pt-3">
+          <div class="bg-slate-800/60 rounded-lg p-3">
+            <div class="text-[11px] text-slate-400">Principal</div>
+            <div class="font-mono font-bold text-white" id="fcs-principal">₱0.00</div>
+          </div>
+          <div class="bg-slate-800/60 rounded-lg p-3">
+            <div class="text-[11px] text-slate-400">Financing charge</div>
+            <div class="font-mono font-bold text-amber-400" id="fcs-total-charge">₱0.00</div>
+          </div>
+        </div>
+
+        <div class="border-t border-slate-700/60 pt-3 space-y-2 text-sm text-slate-300">
+          <div class="flex justify-between"><span class="text-slate-400">Flat Rate</span><span id="fcs-flat-rate" class="font-mono text-white"></span></div>
+          <div class="flex justify-between"><span class="text-slate-400">APR (Simple)</span><span id="fcs-annual-rate" class="font-mono text-white"></span></div>
+          <div class="flex justify-between"><span class="text-slate-400">Monthly add-on</span><span id="fcs-monthly-addon" class="font-mono text-white"></span></div>
+          <div class="flex justify-between"><span class="text-slate-400">Duration</span><span id="fcs-months" class="font-mono text-white"></span></div>
+        </div>
+
+        <div class="mt-4 flex gap-3">
+          <button type="button" id="fc-download-btn" class="flex-1 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold transition shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1.5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            Download card (PNG)
+          </button>
+          <button type="button" id="fc-close-sheet-btn" class="px-3 py-2 rounded-xl bg-slate-700/60 text-white text-sm font-semibold hover:bg-slate-700 transition">Cancel</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1310,6 +1447,152 @@
           showToast('Could not generate image.');
         });
       });
+
+      // --- Financial Card (preview right-side desktop / bottom sheet mobile) ---
+
+      const fcBtn = document.getElementById('financial-card-btn');
+      const fcPanel = document.getElementById('financial-card-panel');
+      const fcSheet = document.getElementById('financial-card-sheet');
+      const fcClose = document.getElementById('financial-card-close');
+      const fcSheetClose = document.getElementById('fc-close-sheet-btn');
+      const fcDownload = document.getElementById('fc-download-btn');
+      const fcDownloadDesktop = document.getElementById('fc-download-btn-desktop');
+
+      const fcCache = {
+        monthly: document.getElementById('fc-hero-monthly'),
+        total: document.getElementById('fc-hero-total'),
+        months: document.getElementById('fc-hero-months'),
+        principal: document.getElementById('fc-principal'),
+        totalCharge: document.getElementById('fc-total-charge'),
+        flatRate: document.getElementById('fc-flat-rate'),
+        annualRate: document.getElementById('fc-annual-rate'),
+        monthlyAddon: document.getElementById('fc-monthly-addon'),
+        monthsLabel: document.getElementById('fc-months'),
+        sheetMonthly: document.getElementById('fcs-hero-monthly'),
+        sheetTotal: document.getElementById('fcs-hero-total'),
+        sheetMonths: document.getElementById('fcs-hero-months'),
+        sheetPrincipal: document.getElementById('fcs-principal'),
+        sheetTotalCharge: document.getElementById('fcs-total-charge'),
+        sheetFlatRate: document.getElementById('fcs-flat-rate'),
+        sheetAnnualRate: document.getElementById('fcs-annual-rate'),
+        sheetMonthlyAddon: document.getElementById('fcs-monthly-addon'),
+        sheetMonthsLabel: document.getElementById('fcs-months'),
+      };
+
+      function setFinancialCardLabel(active) {
+        fcBtn.classList.toggle('bg-emerald-500/20', active);
+        fcBtn.classList.toggle('border-emerald-500', active);
+      }
+
+      function renderFinancialCard() {
+        const totalRepayment = state.principal + state.totalCharge;
+        const monthlyInstallment = totalRepayment / state.months;
+        const flatRate = roundToTwo(state.flatRatePct).toFixed(2).toFixed(2);
+        const monthlyRate = roundToThree(state.monthlyRatePct).toFixed(3);
+        const annualRate = roundToTwo(state.annualRatePct).toFixed(2);
+
+        fcCache.monthly.textContent = formatPHP(monthlyInstallment);
+        fcCache.total.textContent = formatPHP(totalRepayment);
+        fcCache.months.textContent = `${state.months} months`;
+        fcCache.principal.textContent = formatPHP(state.principal);
+        fcCache.totalCharge.textContent = formatPHP(state.totalCharge);
+        fcCache.flatRate.textContent = `${flatRate}% over entire term`;
+        fcCache.annualRate.textContent = `${annualRate}% per year`;
+        fcCache.monthlyAddon.textContent = formatPHP(state.monthlyAddon);
+        fcCache.monthsLabel.textContent = `${state.months} months`;
+
+        fcCache.sheetMonthly.textContent = formatPHP(monthlyInstallment);
+        fcCache.sheetTotal.textContent = formatPHP(totalRepayment);
+        fcCache.sheetMonths.textContent = `${state.months} months`;
+        fcCache.sheetPrincipal.textContent = formatPHP(state.principal);
+        fcCache.sheetTotalCharge.textContent = formatPHP(state.totalCharge);
+        fcCache.sheetFlatRate.textContent = `${flatRate}% over entire term`;
+        fcCache.sheetAnnualRate.textContent = `${annualRate}% per year`;
+        fcCache.sheetMonthlyAddon.textContent = formatPHP(state.monthlyAddon);
+        fcCache.sheetMonthsLabel.textContent = `${state.months} months`;
+      }
+
+      function openFinancialCard() {
+        document.getElementById('financial-card').classList.add('open');
+        setFinancialCardLabel(true);
+        renderFinancialCard();
+      }
+
+      fcBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = document.getElementById('financial-card').classList.contains('open');
+        document.querySelectorAll('.financial-card-overlay').forEach((el) => el.classList.remove('open'));
+        document.getElementById('financial-card').classList.remove('open');
+        fcBtn.classList.remove('bg-emerald-500/20', 'border-emerald-500');
+        if (!isOpen) {
+          openFinancialCard();
+        }
+      });
+
+      function closeFinancialCard() {
+        document.getElementById('financial-card').classList.remove('open');
+        fcBtn.classList.remove('bg-emerald-500/20', 'border-emerald-500');
+      }
+
+      fcClose.addEventListener('click', closeFinancialCard);
+      fcSheetClose.addEventListener('click', closeFinancialCard);
+      fcDownload.addEventListener('click', (e) => { e.stopPropagation(); downloadFinancialCard(); });
+      fcDownloadDesktop.addEventListener('click', (e) => { e.stopPropagation(); downloadFinancialCard(); });
+      fcCloseBtn.addEventListener('click', (e) => { e.stopPropagation(); closeFinancialCard(); });
+      fcSheetClose.addEventListener('click', (e) => { e.stopPropagation(); closeFinancialCard(); });
+
+      document.getElementById('financial-card').addEventListener('click', (e) => {
+        if (e.target.id === 'financial-card') {
+          closeFinancialCard();
+        }
+      });
+
+      function downloadFinancialCard() {
+        showToast('Generating financial card photo...');
+        const totalRepayment = state.principal + state.totalCharge;
+        const monthlyInstallment = totalRepayment / state.months;
+        const rateStr = roundToTwo(state.flatRatePct).toFixed(2);
+        const monthlyRateStr = roundToThree(state.monthlyRatePct).toFixed(3);
+        const annualRateStr = roundToTwo(state.annualRatePct).toFixed(2);
+
+        const portraitCardEl = document.getElementById('portrait-card');
+        document.getElementById('pc-header-price').textContent = formatPHP(state.principal);
+        document.getElementById('pc-hero-monthly').textContent = formatPHP(monthlyInstallment);
+        document.getElementById('pc-hero-months').textContent = `${state.months} months`;
+        document.getElementById('pc-hero-total').textContent = formatPHP(totalRepayment);
+        document.getElementById('pc-orig-price').textContent = formatPHP(state.principal);
+        document.getElementById('pc-charge-amount').textContent = formatPHP(state.totalCharge);
+        document.getElementById('pc-flat-rate').textContent = `${rateStr}% over entire term`;
+        document.getElementById('pc-monthly-rate').textContent = `${monthlyRateStr}% per month`;
+        document.getElementById('pc-annual-rate').textContent = `${annualRateStr}% per year`;
+        document.getElementById('pc-monthly-addon').textContent = formatPHP(state.monthlyAddon);
+        document.getElementById('pc-total-repayment').textContent = formatPHP(totalRepayment);
+
+        html2canvas(portraitCardEl, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#090d16',
+          width: 540,
+          height: 810,
+        }).then((canvas) => {
+          canvas.toBlob((blob) => {
+            if (!blob) { showToast('Could not generate image.'); return; }
+            const url = URL.createObjectURL(blob);
+            const name = `financing-summary-${Math.round(state.principal)}-${state.months}m.png`;
+            if (typeof navigator.share === 'function' && navigator.canShare({ files: [{ uri: url, type: 'image/png', name }] })) {
+              try { navigator.share({ files: [{ uri: url, type: 'image/png', name }] }); } catch (err) { /* cancelled */ }
+            } else {
+              const link = document.createElement('a');
+              link.download = name; link.href = url; link.click();
+              URL.revokeObjectURL(url);
+              showToast('Portrait summary photo downloaded successfully!');
+            }
+          }, 'image/png');
+        }).catch((err) => {
+          console.error(err);
+          showToast('Could not generate image.');
+        });
+      }
 
       // Initialize Calculator on Load
       // Restore last saved state (if any); otherwise fall back to default Preset 1.
