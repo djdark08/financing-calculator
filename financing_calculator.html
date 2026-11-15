@@ -120,6 +120,9 @@
         <button type="button" id="preset-3" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition cursor-pointer">
           Preset 3: ₱300K @ 36m
         </button>
+        <button type="button" id="reset-defaults-btn" class="px-2 py-1.5 rounded-lg text-xs font-medium bg-slate-700 hover:bg-slate-600 text-slate-200 border border-slate-600 transition cursor-pointer" title="Reset all inputs to defaults">
+          Reset to Defaults
+        </button>
       </div>
     </div>
   </header>
@@ -621,6 +624,36 @@
         targetMonthly: 4631.67,   // Target monthly installment for Reverse Estimation mode
       };
 
+      // --- Local persistence (localStorage) so edits survive reloads ---
+      const STORAGE_KEY = 'financing-calculator-state-v1';
+
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (err) {
+          // Storage full, disabled, or quota exceeded — silently ignore.
+        }
+      }
+
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return null;
+          const parsed = JSON.parse(raw);
+          // Only accept objects that look like our state shape; otherwise ignore.
+          if (parsed && typeof parsed === 'object' &&
+              typeof parsed.principal === 'number' &&
+              typeof parsed.months === 'number' &&
+              typeof parsed.chargeAnchor === 'string' &&
+              typeof parsed.flatRatePct === 'number') {
+            return parsed;
+          }
+          return null;
+        } catch (err) {
+          return null;
+        }
+      }
+
       // DOM Element References
       const els = {
         // Mode Switcher
@@ -942,6 +975,7 @@
 
         updateAnchorUI();
         updateTermButtonsUI();
+        saveState(); // Persist user edits after every change.
       }
 
       // Direction Switcher (Forward vs Reverse)
@@ -1143,6 +1177,24 @@
       els.preset2.addEventListener('click', () => applyScenarioPreset(200000, 24, 'preset-2', 'Preset 2: ₱200,000 @ 24 months'));
       els.preset3.addEventListener('click', () => applyScenarioPreset(300000, 36, 'preset-3', 'Preset 3: ₱300,000 @ 36 months'));
 
+      // Reset all inputs to defaults + clear saved state
+      els.resetDefaultsBtn.addEventListener('click', () => {
+        state.principal = 100000;
+        state.quantity = 1;
+        state.months = 24;
+        state.flatRatePct = 11.16;
+        state.monthlyRatePct = 0.465;
+        state.annualRatePct = 5.58;
+        state.monthlyAddon = 465.00;
+        state.totalCharge = 11160.00;
+        state.targetMonthly = 4631.67;
+        state.calcDirection = 'forward';
+        state.chargeAnchor = 'pct';
+        try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }
+        recalculate();
+        showToast('Reset to defaults');
+      });
+
       // Copy Formatted Summary as Text
       els.copyTextBtn.addEventListener('click', () => {
         const totalRepayment = state.principal + state.totalCharge;
@@ -1229,7 +1281,12 @@
         });
       });
 
-      // Initialize Calculator on Load (Defaults to Preset 1)
+      // Initialize Calculator on Load
+      // Restore last saved state (if any); otherwise fall back to default Preset 1.
+      const saved = loadState();
+      if (saved) {
+        Object.assign(state, saved);
+      }
       recalculate();
     })();
   </script>
