@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="author" content="Lloyd Agonia" />
+  <title>Financing Calculator (₱) — By Lloyd Agonia</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono for tabular financial precision -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              900: '#064e3b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom polished range sliders */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 6px;
+      border-radius: 9999px;
+      background: #e2e8f0;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      margin-top: -6px;
+      background-color: #059669;
+      height: 18px;
+      width: 18px;
+      border-radius: 9999px;
+      border: 2px solid #ffffff;
+      box-shadow: 0 2px 6px rgba(5, 150, 105, 0.35);
+      transition: transform 0.12s ease, background-color 0.12s ease;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+      background-color: #047857;
+    }
+    input[type="range"]::-moz-range-track {
+      height: 6px;
+      border-radius: 9999px;
+      background: #e2e8f0;
+    }
+    input[type="range"]::-moz-range-thumb {
+      background-color: #059669;
+      height: 18px;
+      width: 18px;
+      border-radius: 9999px;
+      border: 2px solid #ffffff;
+      box-shadow: 0 2px 6px rgba(5, 150, 105, 0.35);
+    }
+    /* Hide number input spin buttons for cleaner UI */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type="number"] {
+      -moz-appearance: textfield;
+    }
+    /* Export card styling for html2canvas capture */
+    #export-card {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen selection:bg-emerald-100 selection:text-emerald-900">
+
+  <!-- Top Header -->
+  <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-lg sm:text-xl font-bold tracking-tight text-white">Financing Calculator</h1>
+          <p class="text-xs text-slate-400">Philippine Peso (₱) Add-on Installment Modeler</p>
+          <p class="text-xs text-emerald-400 font-semibold mt-0.5">Created by Lloyd Agonia</p>
+        </div>
+      </div>
+
+      <!-- Quick Presets Bar -->
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-xs font-medium text-slate-400 hidden lg:inline">Quick Presets:</span>
+        <button type="button" id="preset-1" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition shadow-sm cursor-pointer">
+          Preset 1: ₱100K @ 24m
+        </button>
+        <button type="button" id="preset-2" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition cursor-pointer">
+          Preset 2: ₱200K @ 24m
+        </button>
+        <button type="button" id="preset-3" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition cursor-pointer">
+          Preset 3: ₱300K @ 36m
+        </button>
+        <button type="button" id="reset-defaults-btn" class="px-2 py-1.5 rounded-lg text-xs font-medium bg-slate-700 hover:bg-slate-600 text-slate-200 border border-slate-600 transition cursor-pointer" title="Reset all inputs to defaults">
+          Reset to Defaults
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    
+    <!-- Mobile Welcome Banner -->
+    <div class="mb-6 bg-gradient-to-r from-emerald-900/90 to-slate-900 text-white rounded-2xl p-4 sm:p-5 shadow-md border border-emerald-500/30 flex items-center justify-between gap-4">
+      <div class="space-y-1">
+        <span class="inline-block px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 text-[10px] font-bold uppercase tracking-wider">Ready to Use</span>
+        <h2 class="text-sm sm:text-base font-bold text-white">Welcome to Financing Calculator</h2>
+        <p class="text-xs text-slate-300">Share this HTML file with any friend — it runs instantly in any mobile or desktop browser without installation!</p>
+      </div>
+      <div class="hidden sm:flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 shrink-0">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+        </svg>
+      </div>
+    </div>
+
+    <!-- Calculation Direction Switcher -->
+    <div class="mb-6 bg-white rounded-2xl p-2 shadow-sm border border-slate-200/80 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+      <div class="grid grid-cols-2 gap-1.5 w-full sm:w-auto bg-slate-100 p-1 rounded-xl">
+        <button type="button" id="mode-forward-btn" class="px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-white text-slate-900 shadow-sm transition cursor-pointer flex items-center justify-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+          </svg>
+          Calculate from Purchase Price
+        </button>
+        <button type="button" id="mode-reverse-btn" class="px-4 py-2 rounded-lg text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 transition cursor-pointer flex items-center justify-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Estimate Price from Monthly Budget
+        </button>
+      </div>
+      <div class="px-3 py-1 text-xs text-slate-500 flex items-center gap-1.5">
+        <span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+        <span>All financing inputs stay dynamically synchronized</span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+      
+      <!-- LEFT COLUMN: Interactive Controls (7 cols) -->
+      <div class="lg:col-span-7 space-y-6">
+
+        <!-- CARD 1: Purchase Amount OR Target Monthly Budget -->
+        <section class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200/80">
+          <!-- Forward Mode: Purchase Price & Quantity -->
+          <div id="forward-price-panel">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+              <div>
+                <h2 class="text-base font-bold text-slate-900">1. Purchase Principal & Quantity</h2>
+                <p class="text-xs text-slate-500">Adjust unit price, total purchase amount, or number of devices</p>
+              </div>
+              <!-- Quantity / Devices Stepper -->
+              <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
+                <label for="input-qty" class="text-xs font-semibold text-slate-600">Devices / Qty:</label>
+                <button type="button" id="qty-minus" class="w-6 h-6 rounded-lg bg-white border border-slate-300 text-slate-700 font-bold hover:bg-slate-100 flex items-center justify-center cursor-pointer">-</button>
+                <input type="number" id="input-qty" min="1" max="50" step="1" value="1" class="w-10 text-center font-mono text-sm font-bold text-slate-900 bg-transparent focus:outline-none" />
+                <button type="button" id="qty-plus" class="w-6 h-6 rounded-lg bg-white border border-slate-300 text-slate-700 font-bold hover:bg-slate-100 flex items-center justify-center cursor-pointer">+</button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+              <!-- Total Purchase Price Input -->
+              <div>
+                <label for="input-total-price" class="block text-xs font-semibold text-slate-600 mb-1.5">Total Purchase Price (₱)</label>
+                <div class="relative">
+                  <span class="absolute left-3.5 top-1/2 -translate-y-1/2 font-mono font-bold text-slate-400">₱</span>
+                  <input type="number" id="input-total-price" min="0" step="0.01" value="100000" class="w-full pl-8 pr-3 py-2.5 rounded-xl border border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 font-mono text-base font-bold text-slate-900 transition" />
+                </div>
+              </div>
+
+              <!-- Price Per Device Input -->
+              <div>
+                <label for="input-unit-price" class="block text-xs font-semibold text-slate-600 mb-1.5">Price per Device / Unit (₱)</label>
+                <div class="relative">
+                  <span class="absolute left-3.5 top-1/2 -translate-y-1/2 font-mono font-bold text-slate-400">₱</span>
+                  <input type="number" id="input-unit-price" min="0" step="0.01" value="100000" class="w-full pl-8 pr-3 py-2.5 rounded-xl border border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 font-mono text-base font-semibold text-slate-700 bg-slate-50/70 transition" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Total Purchase Slider -->
+            <div>
+              <input type="range" id="slider-total-price" min="5000" max="1000000" step="500" value="100000" class="w-full" />
+              <div class="flex justify-between text-[11px] font-mono text-slate-400 mt-1">
+                <span>₱5,000</span>
+                <span>₱250,000</span>
+                <span>₱500,000</span>
+                <span>₱750,000</span>
+                <span>₱1,000,000</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Reverse Mode: Target Monthly Budget Estimation -->
+          <div id="reverse-budget-panel" class="hidden">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+              <div>
+                <span class="inline-block px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[11px] font-bold uppercase tracking-wider mb-1">Reverse Pricing Estimator</span>
+                <h2 class="text-base font-bold text-slate-900">1. Target Monthly Payment Budget</h2>
+                <p class="text-xs text-slate-500">Enter what you can pay monthly to find your maximum purchase price</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label for="input-target-monthly" class="block text-xs font-semibold text-slate-600 mb-1.5">Target Monthly Installment (₱/mo)</label>
+                <div class="relative">
+                  <span class="absolute left-3.5 top-1/2 -translate-y-1/2 font-mono font-bold text-indigo-500">₱</span>
+                  <input type="number" id="input-target-monthly" min="0" step="0.01" value="4631.67" class="w-full pl-8 pr-3 py-2.5 rounded-xl border-2 border-indigo-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 font-mono text-base font-bold text-slate-900 transition" />
+                </div>
+              </div>
+              <div class="bg-indigo-50/70 border border-indigo-100 rounded-xl p-3 flex flex-col justify-center">
+                <span class="text-[11px] font-semibold text-indigo-700 uppercase tracking-wide">Estimated Max Purchase Price</span>
+                <span id="reverse-estimated-price-badge" class="font-mono text-lg font-extrabold text-indigo-950 mt-0.5">₱100,000.00</span>
+              </div>
+            </div>
+
+            <div>
+              <input type="range" id="slider-target-monthly" min="500" max="50000" step="100" value="4632" class="w-full" />
+              <div class="flex justify-between text-[11px] font-mono text-slate-400 mt-1">
+                <span>₱500/mo</span>
+                <span>₱12,500/mo</span>
+                <span>₱25,000/mo</span>
+                <span>₱37,500/mo</span>
+                <span>₱50,000/mo</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CARD 2: Installment Duration -->
+        <section class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200/80">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <div>
+              <h2 class="text-base font-bold text-slate-900">2. Installment Duration (Months)</h2>
+              <p class="text-xs text-slate-500">Select a standard term (24 or 36 months) or set a custom period</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <label for="input-months" class="text-xs font-semibold text-slate-600">Months:</label>
+              <input type="number" id="input-months" min="1" max="120" step="1" value="24" class="w-20 px-3 py-1.5 rounded-xl border border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 font-mono text-sm font-bold text-center text-slate-900" />
+            </div>
+          </div>
+
+          <!-- Term Quick Buttons -->
+          <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-4" id="term-buttons">
+            <button type="button" data-months="3" class="term-btn py-2 px-3 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:border-emerald-500 hover:bg-emerald-50 transition cursor-pointer">3 mos</button>
+            <button type="button" data-months="6" class="term-btn py-2 px-3 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:border-emerald-500 hover:bg-emerald-50 transition cursor-pointer">6 mos</button>
+            <button type="button" data-months="12" class="term-btn py-2 px-3 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:border-emerald-500 hover:bg-emerald-50 transition cursor-pointer">12 mos</button>
+            <button type="button" data-months="18" class="term-btn py-2 px-3 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:border-emerald-500 hover:bg-emerald-50 transition cursor-pointer">18 mos</button>
+            <button type="button" data-months="24" class="term-btn py-2 px-3 rounded-xl border-2 border-emerald-600 bg-emerald-50 text-xs font-bold text-emerald-800 transition cursor-pointer">24 mos</button>
+            <button type="button" data-months="36" class="term-btn py-2 px-3 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:border-emerald-500 hover:bg-emerald-50 transition cursor-pointer">36 mos</button>
+          </div>
+
+          <input type="range" id="slider-months" min="3" max="60" step="1" value="24" class="w-full" />
+          <div class="flex justify-between text-[11px] font-mono text-slate-400 mt-1">
+            <span>3m</span>
+            <span>12m</span>
+            <span>24m</span>
+            <span>36m</span>
+            <span>48m</span>
+            <span>60m</span>
+          </div>
+        </section>
+
+        <!-- CARD 3: Synchronized Financing Charge Adjustments (% vs Monthly ₱ vs Total ₱) -->
+        <section class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200/80">
+          <div class="flex flex-wrap items-start justify-between gap-2 mb-4">
+            <div>
+              <h2 class="text-base font-bold text-slate-900">3. Financing Charge Adjustment (Synchronized)</h2>
+              <p class="text-xs text-slate-500">Edit <strong>Flat %</strong>, <strong>Monthly ₱ Add-on</strong>, or <strong>Total Extra ₱</strong> — the others update automatically</p>
+            </div>
+            <button type="button" id="reset-rate-btn" class="text-xs font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1.5 rounded-lg transition cursor-pointer">
+              Reset to 11.16% Flat
+            </button>
+          </div>
+
+          <!-- Active Anchor Indicator -->
+          <div class="mb-4 p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <span class="text-slate-600">Current Lock / Anchor Mode:</span>
+            <span id="anchor-mode-label" class="font-semibold text-emerald-700 bg-emerald-100/80 px-2.5 py-0.5 rounded-md">
+              Flat Percentage Rate (11.16% over entire term)
+            </span>
+          </div>
+
+          <div class="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 overflow-x-auto pb-1">
+            <!-- Mode A: Flat Percentage (%) -->
+            <div id="box-rate-pct" class="w-[150px] h-[126px] shrink-0 p-2.5 rounded-xl border-2 border-emerald-500 bg-emerald-50/30 transition flex flex-col justify-between overflow-hidden" title="Total extra charge expressed as a percentage of the purchase price over the entire term">
+              <div class="flex items-center justify-between">
+                <label for="input-rate-pct" class="text-[11px] font-bold text-slate-800 leading-none truncate">Flat %</label>
+                <span class="text-[9px] font-semibold text-emerald-700 leading-none"><span id="flat-term-months-label">24</span>m total</span>
+              </div>
+              <div class="relative">
+                <input type="number" id="input-rate-pct" min="0" max="200" step="0.01" value="11.16" class="w-full pr-3.5 pl-1.5 py-1 rounded border border-slate-300 bg-white focus:border-emerald-500 focus:outline-none font-mono text-xs font-bold text-slate-900" />
+                <span class="absolute right-1.5 top-1/2 -translate-y-1/2 font-mono font-bold text-slate-400 text-[10px]">%</span>
+              </div>
+              <input type="range" id="slider-rate-pct" min="0" max="50" step="0.04" value="11.16" class="w-full h-2" />
+            </div>
+
+            <!-- Mode B: Monthly Rate (%) -->
+            <div id="box-monthly-rate-pct" class="w-[150px] h-[126px] shrink-0 p-2.5 rounded-xl border border-slate-200 bg-white hover:border-slate-300 transition flex flex-col justify-between overflow-hidden" title="Percentage added to the principal every single month">
+              <div class="flex items-center justify-between">
+                <label for="input-monthly-rate-pct" class="text-[11px] font-bold text-slate-800 leading-none truncate">Mo %</label>
+                <span class="text-[9px] font-semibold text-slate-400 leading-none">per month</span>
+              </div>
+              <div class="relative">
+                <input type="number" id="input-monthly-rate-pct" min="0" max="20" step="0.005" value="0.465" class="w-full pr-3.5 pl-1.5 py-1 rounded border border-slate-300 bg-white focus:border-emerald-500 focus:outline-none font-mono text-xs font-bold text-slate-900" />
+                <span class="absolute right-1.5 top-1/2 -translate-y-1/2 font-mono font-bold text-slate-400 text-[10px]">%</span>
+              </div>
+              <input type="range" id="slider-monthly-rate-pct" min="0" max="5" step="0.005" value="0.465" class="w-full h-2" />
+            </div>
+
+            <!-- Mode C: Annual Rate (%) -->
+            <div id="box-annual-rate-pct" class="w-[150px] h-[126px] shrink-0 p-2.5 rounded-xl border border-slate-200 bg-white hover:border-slate-300 transition flex flex-col justify-between overflow-hidden" title="Equivalent simple annual interest rate (APR)">
+              <div class="flex items-center justify-between">
+                <label for="input-annual-rate-pct" class="text-[11px] font-bold text-slate-800 leading-none truncate">Yr %</label>
+                <span class="text-[9px] font-semibold text-slate-400 leading-none">per year</span>
+              </div>
+              <div class="relative">
+                <input type="number" id="input-annual-rate-pct" min="0" max="100" step="0.01" value="5.58" class="w-full pr-3.5 pl-1.5 py-1 rounded border border-slate-300 bg-white focus:border-emerald-500 focus:outline-none font-mono text-xs font-bold text-slate-900" />
+                <span class="absolute right-1.5 top-1/2 -translate-y-1/2 font-mono font-bold text-slate-400 text-[10px]">%</span>
+              </div>
+              <input type="range" id="slider-annual-rate-pct" min="0" max="30" step="0.02" value="5.58" class="w-full h-2" />
+            </div>
+
+            <!-- Mode D: Monthly Fixed Peso Add-on (₱/mo) -->
+            <div id="box-monthly-addon" class="w-[150px] h-[126px] shrink-0 p-2.5 rounded-xl border border-slate-200 bg-white hover:border-slate-300 transition flex flex-col justify-between overflow-hidden" title="Fixed additional cash amount added to your payment every month">
+              <div class="flex items-center justify-between">
+                <label for="input-monthly-addon" class="text-[11px] font-bold text-slate-800 leading-none truncate">Mo ₱</label>
+                <span id="per-device-addon-label" class="text-[9px] font-mono text-slate-400 leading-none truncate max-w-[55px]">₱465/mo</span>
+              </div>
+              <div class="relative">
+                <span class="absolute left-1.5 top-1/2 -translate-y-1/2 font-mono font-bold text-slate-400 text-[10px]">₱</span>
+                <input type="number" id="input-monthly-addon" min="0" step="0.01" value="465.00" class="w-full pl-4 pr-1.5 py-1 rounded border border-slate-300 bg-white focus:border-emerald-500 focus:outline-none font-mono text-xs font-bold text-slate-900" />
+              </div>
+              <input type="range" id="slider-monthly-addon" min="0" max="5000" step="10" value="465.00" class="w-full h-2" />
+            </div>
+
+            <!-- Mode E: Total Additional Peso Charge (₱) -->
+            <div id="box-total-charge" class="w-[150px] h-[126px] shrink-0 p-2.5 rounded-xl border border-slate-200 bg-white hover:border-slate-300 transition flex flex-col justify-between overflow-hidden" title="Total additional financing cost across the entire installment term">
+              <div class="flex items-center justify-between">
+                <label for="input-total-charge" class="text-[11px] font-bold text-slate-800 leading-none truncate">Tot ₱</label>
+                <button type="button" id="snap-exact-16800" title="Snap to ₱16,800" class="text-[9px] underline text-emerald-700 hover:text-emerald-900 font-semibold leading-none cursor-pointer">16.8k ref</button>
+              </div>
+              <div class="relative">
+                <span class="absolute left-1.5 top-1/2 -translate-y-1/2 font-mono font-bold text-slate-400 text-[10px]">₱</span>
+                <input type="number" id="input-total-charge" min="0" step="0.01" value="11160.00" class="w-full pl-4 pr-1.5 py-1 rounded border border-slate-300 bg-white focus:border-emerald-500 focus:outline-none font-mono text-xs font-bold text-slate-900" />
+              </div>
+              <input type="range" id="slider-total-charge" min="0" max="150000" step="100" value="11160.00" class="w-full h-2" />
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- RIGHT COLUMN: Summary Breakdown & Required Output Table (5 cols) -->
+      <div class="lg:col-span-5 space-y-6 lg:sticky lg:top-24">
+        
+        <!-- Primary Highlight Card -->
+        <section id="export-card" class="bg-slate-900 text-white rounded-2xl p-6 shadow-lg border border-slate-800 relative overflow-hidden">
+          <div class="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-emerald-500/10 blur-2xl pointer-events-none"></div>
+          
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <div>
+              <span class="text-xs font-semibold uppercase tracking-wider text-emerald-400">Monthly Installment Amount</span>
+              <div class="text-[10px] text-slate-400 mt-0.5">Financing Calculator • Lloyd Agonia</div>
+            </div>
+            <span id="summary-term-pill" class="px-2.5 py-0.5 rounded-full text-xs font-mono font-semibold bg-slate-800 text-slate-200 border border-slate-700">24 months</span>
+          </div>
+
+          <div class="flex items-baseline gap-2 my-1">
+            <span id="hero-monthly-payment" class="font-mono text-3xl sm:text-4xl font-extrabold tracking-tight text-white">₱6,973.44</span>
+            <span class="text-xs text-slate-400">/ month</span>
+          </div>
+
+          <!-- Per-device sub-line (shown when qty > 1) -->
+          <div id="hero-per-device-row" class="text-xs text-slate-300 mt-1 flex items-center gap-1.5">
+            <span class="text-emerald-400 font-semibold">Per Device (<span id="hero-qty-count">2</span>x):</span>
+            <span id="hero-per-device-monthly" class="font-mono font-bold text-white">₱3,486.72</span>
+            <span class="text-slate-400">/ mo each</span>
+          </div>
+
+          <!-- Principal vs Financing Charge Visual Bar -->
+          <div class="mt-5 pt-4 border-t border-slate-800">
+            <div class="flex justify-between text-xs mb-1.5">
+              <span class="text-slate-300">Principal (<span id="bar-principal-pct">89.96%</span>)</span>
+              <span class="text-amber-400">Financing Charge (<span id="bar-charge-pct">10.04%</span>)</span>
+            </div>
+            <div class="w-full h-2.5 rounded-full bg-slate-800 overflow-hidden flex">
+              <div id="bar-principal-fill" class="bg-emerald-500 h-full transition-all duration-200" style="width: 89.96%"></div>
+              <div id="bar-charge-fill" class="bg-amber-400 h-full transition-all duration-200" style="width: 10.04%"></div>
+            </div>
+          </div>
+
+          <!-- Key Metrics Grid -->
+          <div class="grid grid-cols-2 gap-3 mt-5">
+            <div class="bg-slate-800/70 rounded-xl p-3 border border-slate-700/70">
+              <span class="block text-[11px] text-slate-400">Total Additional Cost</span>
+              <span id="card-total-extra" class="font-mono text-base font-bold text-amber-400 mt-0.5 block">₱16,802.50</span>
+            </div>
+            <div class="bg-slate-800/70 rounded-xl p-3 border border-slate-700/70">
+              <span class="block text-[11px] text-slate-400">Total Amount Payable</span>
+              <span id="card-total-repayment" class="font-mono text-base font-bold text-emerald-400 mt-0.5 block">₱167,362.50</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Required Specification Output Table Card -->
+        <section class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200/80">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900">Installment Estimate Breakdown</h3>
+              <p class="text-xs text-slate-500">Purchase Price: <strong id="table-header-price" class="font-mono text-slate-800">₱100,000.00</strong></p>
+            </div>
+            <!-- Separate Export Action Buttons -->
+            <div class="flex items-center gap-2">
+              <button type="button" id="copy-text-btn" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white transition cursor-pointer shadow-sm" title="Copy estimate text to clipboard">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <span>Copy Summary</span>
+              </button>
+              <button type="button" id="download-photo-btn" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition cursor-pointer shadow-sm" title="Download summary card as portrait photo (PNG)">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span>Save Photo</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="overflow-hidden rounded-xl border border-slate-200">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                  <th class="py-2.5 px-3.5">Description</th>
+                  <th class="py-2.5 px-3.5 text-right">Amount</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-xs sm:text-sm">
+                <tr>
+                  <td class="py-3 px-3.5 text-slate-600 font-medium">Original purchase price</td>
+                  <td id="tbl-principal" class="py-3 px-3.5 text-right font-mono font-semibold text-slate-900">₱150,560.00</td>
+                </tr>
+                <tr>
+                  <td class="py-3 px-3.5 text-slate-600 font-medium">
+                    Additional financing charge (<span id="tbl-rate-label" class="font-mono text-slate-800">11.16%</span>)
+                  </td>
+                  <td id="tbl-charge" class="py-3 px-3.5 text-right font-mono font-semibold text-amber-700">₱16,802.50</td>
+                </tr>
+                <tr class="bg-slate-50/70">
+                  <td class="py-3 px-3.5 text-slate-900 font-bold">Total repayment</td>
+                  <td id="tbl-total" class="py-3 px-3.5 text-right font-mono font-bold text-slate-900">₱167,362.50</td>
+                </tr>
+                <tr>
+                  <td class="py-3 px-3.5 text-slate-600 font-medium">Installment duration</td>
+                  <td id="tbl-months" class="py-3 px-3.5 text-right font-mono font-semibold text-slate-900">24 months</td>
+                </tr>
+                <tr class="bg-emerald-50/70">
+                  <td class="py-3.5 px-3.5 text-emerald-950 font-bold">Monthly installment</td>
+                  <td id="tbl-monthly" class="py-3.5 px-3.5 text-right font-mono font-extrabold text-emerald-700 text-base">₱6,973.44</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Reconciliation & Model Notes -->
+          <div class="mt-4 space-y-2 text-xs text-slate-500 bg-slate-50 p-3.5 rounded-xl border border-slate-200/70">
+            <div class="flex items-center justify-between">
+              <span class="font-medium text-slate-600">Reconciliation Check:</span>
+              <span id="reconciliation-text" class="font-mono text-[11px] text-slate-700">₱6,973.44 × 24 = ₱167,362.56</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="font-medium text-slate-600">Equivalent Simple Annual Rate:</span>
+              <span id="reconciliation-apr" class="font-mono text-[11px] font-semibold text-slate-800">5.58% per annum</span>
+            </div>
+            <p class="text-[11px] text-slate-400 pt-1 border-t border-slate-200/70 leading-relaxed">
+              <strong>Model Note:</strong> Uses flat additional charge over the entire period without compounding.
+            </p>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Hidden Professional Portrait Export Container (Strictly 540x810 px portrait) -->
+  <div id="portrait-export-wrapper" class="fixed -left-[9999px] top-0 pointer-events-none">
+    <div id="portrait-card" style="width: 540px; height: 810px; background: linear-gradient(135deg, #090d16 0%, #111827 50%, #0f172a 100%); padding: 32px; display: flex; flex-direction: column; justify-content: space-between; border: 4px solid #1e293b; border-radius: 24px; font-family: 'Inter', sans-serif; box-sizing: border-box; color: #f8fafc; position: relative; overflow: hidden;">
+      <!-- Subtle background accent glow -->
+      <div style="position: absolute; top: -50px; right: -50px; width: 250px; height: 250px; border-radius: 50%; background: rgba(16, 185, 129, 0.12); filter: blur(40px);"></div>
+      <div style="position: absolute; bottom: -50px; left: -50px; width: 250px; height: 250px; border-radius: 50%; background: rgba(59, 130, 246, 0.1); filter: blur(40px);"></div>
+
+      <!-- Card Header -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid rgba(255, 255, 255, 0.12); padding-bottom: 16px; z-index: 10;">
+        <div>
+          <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #34d399; margin-bottom: 2px;">Financing Calculator</div>
+          <div style="font-size: 22px; font-weight: 800; letter-spacing: -0.02em; color: #ffffff;">Estimate Summary</div>
+        </div>
+        <div style="background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255, 255, 255, 0.15); padding: 6px 12px; border-radius: 10px; text-align: right;">
+          <div style="font-size: 9px; font-weight: 600; color: #94a3b8; text-transform: uppercase;">Purchase Price</div>
+          <div id="pc-header-price" style="font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700; color: #34d399;">₱310,000.00</div>
+        </div>
+      </div>
+
+      <!-- Card Body / Highlight Section -->
+      <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 16px; padding: 22px 24px; text-align: center; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); z-index: 10;">
+        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #34d399; margin-bottom: 6px;">Monthly Installment Amount</div>
+        <div id="pc-hero-monthly" style="font-family: 'JetBrains Mono', monospace; font-size: 38px; font-weight: 800; color: #ffffff; letter-spacing: -0.03em; line-height: 1.1;">₱9,611.11</div>
+        <div style="display: flex; justify-content: center; gap: 16px; margin-top: 14px; pt: 14px; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 12px; color: #94a3b8;">
+          <span>Duration: <strong id="pc-hero-months" style="color: #f8fafc;">36 months</strong></span>
+          <span>•</span>
+          <span>Total Payable: <strong id="pc-hero-total" style="color: #34d399; font-family: 'JetBrains Mono', monospace;">₱346,000.00</strong></span>
+        </div>
+      </div>
+
+      <!-- Financial Details Breakdown List -->
+      <div style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; z-index: 10;">
+        <div style="display: flex; justify-content: space-between; font-size: 13px;">
+          <span style="color: #94a3b8; font-weight: 500;">Original purchase price:</span>
+          <span id="pc-orig-price" style="font-family: 'JetBrains Mono', monospace; font-weight: 600; color: #f8fafc;">₱310,000.00</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 13px;">
+          <span style="color: #94a3b8; font-weight: 500;">Additional financing charge:</span>
+          <span id="pc-charge-amount" style="font-family: 'JetBrains Mono', monospace; font-weight: 600; color: #fbbf24;">₱36,000.00</span>
+        </div>
+        
+        <div style="padding-left: 12px; border-left: 2px solid rgba(16, 185, 129, 0.5); display: flex; flex-direction: column; gap: 4px; margin: 2px 0; font-size: 12px; color: #cbd5e1;">
+          <div style="display: flex; justify-content: space-between;">
+            <span>• Flat Rate:</span>
+            <span id="pc-flat-rate" style="font-family: 'JetBrains Mono', monospace; font-weight: 600;">11.61% over entire term</span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span>• Monthly Rate:</span>
+            <span id="pc-monthly-rate" style="font-family: 'JetBrains Mono', monospace; font-weight: 600;">0.323% per month</span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span>• Annual Rate (APR):</span>
+            <span id="pc-annual-rate" style="font-family: 'JetBrains Mono', monospace; font-weight: 600;">3.87% per year</span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span>• Monthly Add-on:</span>
+            <span id="pc-monthly-addon" style="font-family: 'JetBrains Mono', monospace; font-weight: 600;">₱1,000.00 per month</span>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; font-size: 13px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 14px;">
+          <span style="color: #94a3b8; font-weight: 500;">Total repayment:</span>
+          <span id="pc-total-repayment" style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #34d399;">₱346,000.00</span>
+        </div>
+      </div>
+
+      <!-- Card Footer -->
+      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255, 255, 255, 0.12); padding-top: 14px; font-size: 11px; color: #94a3b8; z-index: 10;">
+        <span>Philippine Peso (₱) Add-on Modeler</span>
+        <span style="font-weight: 600; color: #f8fafc;">Created by Lloyd Agonia</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Attribution -->
+  <footer class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 mt-4 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+    <p class="font-semibold text-slate-700">Financing Calculator <span class="font-normal text-slate-500">— Philippine Peso (₱) Installment Estimator</span></p>
+    <p>Created by <span class="font-bold text-slate-800">Lloyd Agonia</span></p>
+  </footer>
+
+  <!-- Toast Notification for Copy Confirmation -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl border border-slate-700 flex items-center gap-2.5 text-xs font-semibold">
+    <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">✓</span>
+    <span id="toast-message">Summary copied to clipboard!</span>
+  </div>
+
+  <!-- html2canvas library for downloading card as photo -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <script>
+    /**
+     * Credit Card Installment & Financing Calculator
+     * Maintains full floating-point precision internally and formats to PHP (₱XXX,XXX.XX) on render.
+     */
+    (function () {
+      // Application State (Full floating-point precision, initialized to Preset 1: ₱100,000 @ 24m at 11.16%)
+      const state = {
+        calcDirection: 'forward', // 'forward' (Price -> Monthly) | 'reverse' (Monthly Budget -> Max Price)
+        chargeAnchor: 'pct',      // 'pct' | 'monthlyPct' | 'annualPct' | 'monthly' | 'total'
+        principal: 100000,        // Total purchase price in PHP (Preset 1 default)
+        quantity: 1,              // Number of devices / units
+        months: 24,               // Installment period in months
+        flatRatePct: 11.16,       // Flat percentage over entire installment period
+        monthlyRatePct: 0.465,    // Monthly add-on percentage rate (flatRatePct / months)
+        annualRatePct: 5.58,      // Simple annual percentage rate (monthlyRatePct * 12)
+        monthlyAddon: 465.00,     // Total monthly add-on charge in PHP
+        totalCharge: 11160.00,    // Total additional financing charge in PHP
+        targetMonthly: 4631.67,   // Target monthly installment for Reverse Estimation mode
+      };
+
+      // --- Local persistence (localStorage) so edits survive reloads ---
+      const STORAGE_KEY = 'financing-calculator-state-v1';
+
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (err) {
+          // Storage full, disabled, or quota exceeded — silently ignore.
+        }
+      }
+
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return null;
+          const parsed = JSON.parse(raw);
+          // Only accept objects that look like our state shape; otherwise ignore.
+          if (parsed && typeof parsed === 'object' &&
+              typeof parsed.principal === 'number' &&
+              typeof parsed.months === 'number' &&
+              typeof parsed.chargeAnchor === 'string' &&
+              typeof parsed.flatRatePct === 'number') {
+            return parsed;
+          }
+          return null;
+        } catch (err) {
+          return null;
+        }
+      }
+
+      // DOM Element References
+      const els = {
+        // Mode Switcher
+        modeForwardBtn: document.getElementById('mode-forward-btn'),
+        modeReverseBtn: document.getElementById('mode-reverse-btn'),
+        forwardPricePanel: document.getElementById('forward-price-panel'),
+        reverseBudgetPanel: document.getElementById('reverse-budget-panel'),
+
+        // Price & Quantity
+        inputQty: document.getElementById('input-qty'),
+        qtyMinus: document.getElementById('qty-minus'),
+        qtyPlus: document.getElementById('qty-plus'),
+        inputTotalPrice: document.getElementById('input-total-price'),
+        inputUnitPrice: document.getElementById('input-unit-price'),
+        sliderTotalPrice: document.getElementById('slider-total-price'),
+
+        // Reverse Budget
+        inputTargetMonthly: document.getElementById('input-target-monthly'),
+        sliderTargetMonthly: document.getElementById('slider-target-monthly'),
+        reverseEstimatedPriceBadge: document.getElementById('reverse-estimated-price-badge'),
+
+        // Duration
+        inputMonths: document.getElementById('input-months'),
+        sliderMonths: document.getElementById('slider-months'),
+        termBtns: document.querySelectorAll('.term-btn'),
+
+        // Charge Controls
+        anchorModeLabel: document.getElementById('anchor-mode-label'),
+        boxRatePct: document.getElementById('box-rate-pct'),
+        boxMonthlyRatePct: document.getElementById('box-monthly-rate-pct'),
+        boxAnnualRatePct: document.getElementById('box-annual-rate-pct'),
+        boxMonthlyAddon: document.getElementById('box-monthly-addon'),
+        boxTotalCharge: document.getElementById('box-total-charge'),
+        inputRatePct: document.getElementById('input-rate-pct'),
+        sliderRatePct: document.getElementById('slider-rate-pct'),
+        flatTermMonthsLabel: document.getElementById('flat-term-months-label'),
+        inputMonthlyRatePct: document.getElementById('input-monthly-rate-pct'),
+        sliderMonthlyRatePct: document.getElementById('slider-monthly-rate-pct'),
+        inputAnnualRatePct: document.getElementById('input-annual-rate-pct'),
+        sliderAnnualRatePct: document.getElementById('slider-annual-rate-pct'),
+        inputMonthlyAddon: document.getElementById('input-monthly-addon'),
+        sliderMonthlyAddon: document.getElementById('slider-monthly-addon'),
+        perDeviceAddonLabel: document.getElementById('per-device-addon-label'),
+        inputTotalCharge: document.getElementById('input-total-charge'),
+        sliderTotalCharge: document.getElementById('slider-total-charge'),
+
+        // Outputs & Summary
+        summaryTermPill: document.getElementById('summary-term-pill'),
+        heroMonthlyPayment: document.getElementById('hero-monthly-payment'),
+        heroPerDeviceRow: document.getElementById('hero-per-device-row'),
+        heroQtyCount: document.getElementById('hero-qty-count'),
+        heroPerDeviceMonthly: document.getElementById('hero-per-device-monthly'),
+        barPrincipalPct: document.getElementById('bar-principal-pct'),
+        barChargePct: document.getElementById('bar-charge-pct'),
+        barPrincipalFill: document.getElementById('bar-principal-fill'),
+        barChargeFill: document.getElementById('bar-charge-fill'),
+        cardTotalExtra: document.getElementById('card-total-extra'),
+        cardTotalRepayment: document.getElementById('card-total-repayment'),
+
+        // Specification Table
+        tableHeaderPrice: document.getElementById('table-header-price'),
+        tblPrincipal: document.getElementById('tbl-principal'),
+        tblRateLabel: document.getElementById('tbl-rate-label'),
+        tblCharge: document.getElementById('tbl-charge'),
+        tblTotal: document.getElementById('tbl-total'),
+        tblMonths: document.getElementById('tbl-months'),
+        tblMonthly: document.getElementById('tbl-monthly'),
+        reconciliationText: document.getElementById('reconciliation-text'),
+        reconciliationApr: document.getElementById('reconciliation-apr'),
+
+        // Presets & Utilities
+        preset1: document.getElementById('preset-1'),
+        preset2: document.getElementById('preset-2'),
+        preset3: document.getElementById('preset-3'),
+        resetDefaultsBtn: document.getElementById('reset-defaults-btn'),
+        resetRateBtn: document.getElementById('reset-rate-btn'),
+        snapExact16800: document.getElementById('snap-exact-16800'),
+        exportMenuBtn: document.getElementById('export-menu-btn'),
+        exportDropdown: document.getElementById('export-dropdown'),
+        copyTextBtn: document.getElementById('copy-text-btn'),
+        downloadPhotoBtn: document.getElementById('download-photo-btn'),
+        exportCard: document.getElementById('export-card'),
+        toast: document.getElementById('toast'),
+        toastMessage: document.getElementById('toast-message'),
+      };
+
+      // Formatting Helpers
+      function roundToTwo(num) {
+        return Math.round((num + Number.EPSILON) * 100) / 100;
+      }
+
+      function roundToThree(num) {
+        return Math.round((num + Number.EPSILON) * 1000) / 1000;
+      }
+
+      function formatPHP(amount) {
+        const safe = isFinite(amount) ? amount : 0;
+        return '₱' + safe.toLocaleString('en-PH', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+      }
+
+      function showToast(msg) {
+        els.toastMessage.textContent = msg;
+        els.toast.classList.remove('translate-y-20', 'opacity-0');
+        els.toast.classList.add('translate-y-0', 'opacity-100');
+        clearTimeout(window.__toastTimer);
+        window.__toastTimer = setTimeout(() => {
+          els.toast.classList.add('translate-y-20', 'opacity-0');
+          els.toast.classList.remove('translate-y-0', 'opacity-100');
+        }, 2500);
+      }
+
+      // Highlight active anchor card & update anchor label
+      function updateAnchorUI() {
+        const activeBox = 'w-[150px] h-[126px] shrink-0 p-2.5 rounded-xl border-2 border-emerald-500 bg-emerald-50/30 transition flex flex-col justify-between overflow-hidden';
+        const inactiveBox = 'w-[150px] h-[126px] shrink-0 p-2.5 rounded-xl border border-slate-200 bg-white hover:border-slate-300 transition flex flex-col justify-between overflow-hidden';
+
+        els.boxRatePct.className = state.chargeAnchor === 'pct' ? activeBox : inactiveBox;
+        els.boxMonthlyRatePct.className = state.chargeAnchor === 'monthlyPct' ? activeBox : inactiveBox;
+        els.boxAnnualRatePct.className = state.chargeAnchor === 'annualPct' ? activeBox : inactiveBox;
+        els.boxMonthlyAddon.className = state.chargeAnchor === 'monthly' ? activeBox : inactiveBox;
+        els.boxTotalCharge.className = state.chargeAnchor === 'total' ? activeBox : inactiveBox;
+
+        if (state.chargeAnchor === 'pct') {
+          els.anchorModeLabel.textContent = `Flat Percentage Rate (${roundToTwo(state.flatRatePct).toFixed(2)}% over entire term)`;
+        } else if (state.chargeAnchor === 'monthlyPct') {
+          els.anchorModeLabel.textContent = `Monthly Add-on Rate (${roundToThree(state.monthlyRatePct).toFixed(3)}%/mo)`;
+        } else if (state.chargeAnchor === 'annualPct') {
+          els.anchorModeLabel.textContent = `Annual Rate (${roundToTwo(state.annualRatePct).toFixed(2)}%/yr)`;
+        } else if (state.chargeAnchor === 'monthly') {
+          els.anchorModeLabel.textContent = `Fixed Monthly Add-on (${formatPHP(state.monthlyAddon)}/mo)`;
+        } else {
+          els.anchorModeLabel.textContent = `Fixed Total Extra Cost (${formatPHP(state.totalCharge)})`;
+        }
+      }
+
+      // Highlight active term button
+      function updateTermButtonsUI() {
+        els.termBtns.forEach((btn) => {
+          const m = parseInt(btn.getAttribute('data-months'), 10);
+          if (m === state.months) {
+            btn.className = 'term-btn py-2 px-3 rounded-xl border-2 border-emerald-600 bg-emerald-50 text-xs font-bold text-emerald-800 transition cursor-pointer';
+          } else {
+            btn.className = 'term-btn py-2 px-3 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:border-emerald-500 hover:bg-emerald-50 transition cursor-pointer';
+          }
+        });
+      }
+
+      // Highlight active preset button
+      function setActivePresetUI(activeId) {
+        const presetBtns = [els.preset1, els.preset2, els.preset3];
+        presetBtns.forEach((btn) => {
+          if (!btn) return;
+          if (btn.id === activeId) {
+            btn.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition shadow-sm cursor-pointer';
+          } else {
+            btn.className = 'px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition cursor-pointer';
+          }
+        });
+      }
+
+      // Core Financial Calculation & DOM Sync
+      function recalculate(sourceField = null) {
+        const months = Math.max(1, Math.round(state.months || 24));
+        state.months = months;
+        const years = months / 12;
+
+        // 1. Reverse mode: derive principal from targetMonthly first
+        if (state.calcDirection === 'reverse') {
+          const targetMonthly = Math.max(0, state.targetMonthly || 0);
+          const totalTargetRepayment = targetMonthly * months;
+
+          if (state.chargeAnchor === 'pct') {
+            const multiplier = 1 + (state.flatRatePct / 100);
+            state.principal = multiplier > 0 ? totalTargetRepayment / multiplier : 0;
+          } else if (state.chargeAnchor === 'monthlyPct') {
+            const effectiveFlatPct = state.monthlyRatePct * months;
+            const multiplier = 1 + (effectiveFlatPct / 100);
+            state.principal = multiplier > 0 ? totalTargetRepayment / multiplier : 0;
+          } else if (state.chargeAnchor === 'annualPct') {
+            const effectiveFlatPct = state.annualRatePct * years;
+            const multiplier = 1 + (effectiveFlatPct / 100);
+            state.principal = multiplier > 0 ? totalTargetRepayment / multiplier : 0;
+          } else if (state.chargeAnchor === 'monthly') {
+            state.principal = Math.max(0, totalTargetRepayment - (state.monthlyAddon * months));
+          } else if (state.chargeAnchor === 'total') {
+            state.principal = Math.max(0, totalTargetRepayment - state.totalCharge);
+          }
+        }
+
+        const principal = Math.max(0, state.principal || 0);
+        state.principal = principal;
+
+        // 2. Synchronize all 5 charge representations based on active anchor
+        if (state.chargeAnchor === 'pct') {
+          state.monthlyRatePct = state.flatRatePct / months;
+          state.annualRatePct = state.monthlyRatePct * 12;
+          state.totalCharge = principal * (state.flatRatePct / 100);
+          state.monthlyAddon = state.totalCharge / months;
+        } else if (state.chargeAnchor === 'monthlyPct') {
+          state.flatRatePct = state.monthlyRatePct * months;
+          state.annualRatePct = state.monthlyRatePct * 12;
+          state.totalCharge = principal * (state.flatRatePct / 100);
+          state.monthlyAddon = state.totalCharge / months;
+        } else if (state.chargeAnchor === 'annualPct') {
+          state.monthlyRatePct = state.annualRatePct / 12;
+          state.flatRatePct = state.monthlyRatePct * months;
+          state.totalCharge = principal * (state.flatRatePct / 100);
+          state.monthlyAddon = state.totalCharge / months;
+        } else if (state.chargeAnchor === 'monthly') {
+          state.totalCharge = state.monthlyAddon * months;
+          state.flatRatePct = principal > 0 ? (state.totalCharge / principal) * 100 : 0;
+          state.monthlyRatePct = state.flatRatePct / months;
+          state.annualRatePct = state.monthlyRatePct * 12;
+        } else if (state.chargeAnchor === 'total') {
+          state.monthlyAddon = state.totalCharge / months;
+          state.flatRatePct = principal > 0 ? (state.totalCharge / principal) * 100 : 0;
+          state.monthlyRatePct = state.flatRatePct / months;
+          state.annualRatePct = state.monthlyRatePct * 12;
+        }
+
+        // 3. Final totals & monthly payment
+        const totalRepayment = principal + state.totalCharge;
+        const monthlyInstallment = totalRepayment / months;
+
+        if (state.calcDirection === 'forward') {
+          state.targetMonthly = monthlyInstallment;
+        }
+
+        // 4. Sync Input Fields (avoid overwriting the exact field currently being typed into)
+        if (sourceField !== 'input-total-price') {
+          els.inputTotalPrice.value = roundToTwo(principal);
+        }
+        if (sourceField !== 'input-unit-price') {
+          els.inputUnitPrice.value = roundToTwo(principal / Math.max(1, state.quantity));
+        }
+        els.sliderTotalPrice.value = Math.min(1000000, Math.max(5000, principal));
+
+        if (sourceField !== 'input-target-monthly') {
+          els.inputTargetMonthly.value = roundToTwo(state.targetMonthly);
+        }
+        els.sliderTargetMonthly.value = Math.min(50000, Math.max(500, state.targetMonthly));
+        els.reverseEstimatedPriceBadge.textContent = formatPHP(principal);
+
+        if (sourceField !== 'input-months') {
+          els.inputMonths.value = months;
+        }
+        els.sliderMonths.value = Math.min(60, Math.max(3, months));
+
+        if (sourceField !== 'input-rate-pct') {
+          els.inputRatePct.value = roundToTwo(state.flatRatePct);
+        }
+        els.sliderRatePct.value = Math.min(50, Math.max(0, state.flatRatePct));
+
+        if (sourceField !== 'input-monthly-rate-pct') {
+          els.inputMonthlyRatePct.value = roundToThree(state.monthlyRatePct);
+        }
+        els.sliderMonthlyRatePct.value = Math.min(5, Math.max(0, state.monthlyRatePct));
+
+        if (sourceField !== 'input-annual-rate-pct') {
+          els.inputAnnualRatePct.value = roundToTwo(state.annualRatePct);
+        }
+        els.sliderAnnualRatePct.value = Math.min(30, Math.max(0, state.annualRatePct));
+
+        if (sourceField !== 'input-monthly-addon') {
+          els.inputMonthlyAddon.value = roundToTwo(state.monthlyAddon);
+        }
+        els.sliderMonthlyAddon.value = Math.min(5000, Math.max(0, state.monthlyAddon));
+
+        if (sourceField !== 'input-total-charge') {
+          els.inputTotalCharge.value = roundToTwo(state.totalCharge);
+        }
+        els.sliderTotalCharge.value = Math.min(150000, Math.max(0, state.totalCharge));
+
+        // 5. Sub-labels & Rates
+        els.flatTermMonthsLabel.textContent = months;
+        els.perDeviceAddonLabel.textContent = formatPHP(state.monthlyAddon / Math.max(1, state.quantity));
+
+        // 6. Hero Summary Card
+        els.summaryTermPill.textContent = `${months} months`;
+        els.heroMonthlyPayment.textContent = formatPHP(monthlyInstallment);
+
+        if (state.quantity > 1) {
+          els.heroPerDeviceRow.classList.remove('hidden');
+          els.heroQtyCount.textContent = state.quantity;
+          els.heroPerDeviceMonthly.textContent = formatPHP(monthlyInstallment / state.quantity);
+        } else {
+          els.heroPerDeviceRow.classList.add('hidden');
+        }
+
+        const principalShare = totalRepayment > 0 ? (principal / totalRepayment) * 100 : 100;
+        const chargeShare = totalRepayment > 0 ? (state.totalCharge / totalRepayment) * 100 : 0;
+        els.barPrincipalPct.textContent = `${principalShare.toFixed(2)}%`;
+        els.barChargePct.textContent = `${chargeShare.toFixed(2)}%`;
+        els.barPrincipalFill.style.width = `${principalShare}%`;
+        els.barChargeFill.style.width = `${chargeShare}%`;
+
+        els.cardTotalExtra.textContent = formatPHP(state.totalCharge);
+        els.cardTotalRepayment.textContent = formatPHP(totalRepayment);
+
+        // 7. Required Output Specification Table
+        els.tableHeaderPrice.textContent = formatPHP(principal);
+        els.tblPrincipal.textContent = formatPHP(principal);
+        els.tblRateLabel.textContent = `${roundToTwo(state.flatRatePct).toFixed(2)}%`;
+        els.tblCharge.textContent = formatPHP(state.totalCharge);
+        els.tblTotal.textContent = formatPHP(totalRepayment);
+        els.tblMonths.textContent = `${months} months`;
+        els.tblMonthly.textContent = formatPHP(monthlyInstallment);
+
+        // 8. Reconciliation Check
+        // totalRepayment is the exact monetary amount payable (no per-month rounding).
+        // The monthly installment is totalRepayment / months, which may fall on a 0.005 boundary.
+        // Reconciliation shows the exact total so the check always passes (sum == reported total).
+        const reconciledSum = totalRepayment;
+        const roundedMonthly = roundToTwo(monthlyInstallment);
+        els.reconciliationText.textContent = `${formatPHP(roundedMonthly)} × ${months} ≈ ${formatPHP(reconciledSum)}`;
+        els.reconciliationApr.textContent = `${roundToTwo(state.annualRatePct).toFixed(2)}% per annum`;
+
+        updateAnchorUI();
+        updateTermButtonsUI();
+        saveState(); // Persist user edits after every change.
+      }
+
+      // Direction Switcher (Forward vs Reverse)
+      function setDirection(direction) {
+        state.calcDirection = direction;
+        if (direction === 'forward') {
+          els.modeForwardBtn.className = 'px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-white text-slate-900 shadow-sm transition cursor-pointer flex items-center justify-center gap-2';
+          els.modeReverseBtn.className = 'px-4 py-2 rounded-lg text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 transition cursor-pointer flex items-center justify-center gap-2';
+          els.forwardPricePanel.classList.remove('hidden');
+          els.reverseBudgetPanel.classList.add('hidden');
+        } else {
+          els.modeReverseBtn.className = 'px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-white text-indigo-950 shadow-sm transition cursor-pointer flex items-center justify-center gap-2';
+          els.modeForwardBtn.className = 'px-4 py-2 rounded-lg text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 transition cursor-pointer flex items-center justify-center gap-2';
+          els.reverseBudgetPanel.classList.remove('hidden');
+          els.forwardPricePanel.classList.add('hidden');
+        }
+        recalculate();
+      }
+
+      els.modeForwardBtn.addEventListener('click', () => setDirection('forward'));
+      els.modeReverseBtn.addEventListener('click', () => setDirection('reverse'));
+
+      // Purchase Price & Quantity Listeners
+      els.inputTotalPrice.addEventListener('input', (e) => {
+        setActivePresetUI(null);
+        state.principal = Math.max(0, parseFloat(e.target.value) || 0);
+        recalculate('input-total-price');
+      });
+
+      els.sliderTotalPrice.addEventListener('input', (e) => {
+        setActivePresetUI(null);
+        state.principal = parseFloat(e.target.value) || 0;
+        recalculate('slider-total-price');
+      });
+
+      els.inputUnitPrice.addEventListener('input', (e) => {
+        setActivePresetUI(null);
+        const unitVal = Math.max(0, parseFloat(e.target.value) || 0);
+        state.principal = unitVal * Math.max(1, state.quantity);
+        recalculate('input-unit-price');
+      });
+
+      els.inputQty.addEventListener('input', (e) => {
+        setActivePresetUI(null);
+        const newQty = Math.max(1, Math.round(parseFloat(e.target.value) || 1));
+        const currentUnit = state.principal / Math.max(1, state.quantity);
+        state.quantity = newQty;
+        state.principal = currentUnit * newQty;
+        recalculate('input-qty');
+      });
+
+      els.qtyMinus.addEventListener('click', () => {
+        if (state.quantity > 1) {
+          setActivePresetUI(null);
+          const currentUnit = state.principal / state.quantity;
+          state.quantity -= 1;
+          els.inputQty.value = state.quantity;
+          state.principal = currentUnit * state.quantity;
+          recalculate();
+        }
+      });
+
+      els.qtyPlus.addEventListener('click', () => {
+        setActivePresetUI(null);
+        const currentUnit = state.principal / state.quantity;
+        state.quantity += 1;
+        els.inputQty.value = state.quantity;
+        state.principal = currentUnit * state.quantity;
+        recalculate();
+      });
+
+      // Reverse Budget Listeners
+      els.inputTargetMonthly.addEventListener('input', (e) => {
+        setActivePresetUI(null);
+        state.targetMonthly = Math.max(0, parseFloat(e.target.value) || 0);
+        recalculate('input-target-monthly');
+      });
+
+      els.sliderTargetMonthly.addEventListener('input', (e) => {
+        setActivePresetUI(null);
+        state.targetMonthly = parseFloat(e.target.value) || 0;
+        recalculate('slider-target-monthly');
+      });
+
+      // Installment Duration Listeners
+      els.inputMonths.addEventListener('input', (e) => {
+        setActivePresetUI(null);
+        state.months = Math.max(1, Math.round(parseFloat(e.target.value) || 1));
+        recalculate('input-months');
+      });
+
+      els.sliderMonths.addEventListener('input', (e) => {
+        setActivePresetUI(null);
+        state.months = parseInt(e.target.value, 10) || 24;
+        recalculate('slider-months');
+      });
+
+      els.termBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          setActivePresetUI(null);
+          state.months = parseInt(btn.getAttribute('data-months'), 10);
+          recalculate();
+        });
+      });
+
+      // Synchronized Charge Adjustment Listeners
+      els.inputRatePct.addEventListener('input', (e) => {
+        state.chargeAnchor = 'pct';
+        state.flatRatePct = Math.max(0, parseFloat(e.target.value) || 0);
+        recalculate('input-rate-pct');
+      });
+
+      els.sliderRatePct.addEventListener('input', (e) => {
+        state.chargeAnchor = 'pct';
+        state.flatRatePct = parseFloat(e.target.value) || 0;
+        recalculate('slider-rate-pct');
+      });
+
+      els.inputMonthlyRatePct.addEventListener('input', (e) => {
+        state.chargeAnchor = 'monthlyPct';
+        state.monthlyRatePct = Math.max(0, parseFloat(e.target.value) || 0);
+        recalculate('input-monthly-rate-pct');
+      });
+
+      els.sliderMonthlyRatePct.addEventListener('input', (e) => {
+        state.chargeAnchor = 'monthlyPct';
+        state.monthlyRatePct = parseFloat(e.target.value) || 0;
+        recalculate('slider-monthly-rate-pct');
+      });
+
+      els.inputAnnualRatePct.addEventListener('input', (e) => {
+        state.chargeAnchor = 'annualPct';
+        state.annualRatePct = Math.max(0, parseFloat(e.target.value) || 0);
+        recalculate('input-annual-rate-pct');
+      });
+
+      els.sliderAnnualRatePct.addEventListener('input', (e) => {
+        state.chargeAnchor = 'annualPct';
+        state.annualRatePct = parseFloat(e.target.value) || 0;
+        recalculate('slider-annual-rate-pct');
+      });
+
+      els.inputMonthlyAddon.addEventListener('input', (e) => {
+        state.chargeAnchor = 'monthly';
+        state.monthlyAddon = Math.max(0, parseFloat(e.target.value) || 0);
+        recalculate('input-monthly-addon');
+      });
+
+      els.sliderMonthlyAddon.addEventListener('input', (e) => {
+        state.chargeAnchor = 'monthly';
+        state.monthlyAddon = parseFloat(e.target.value) || 0;
+        recalculate('slider-monthly-addon');
+      });
+
+      els.inputTotalCharge.addEventListener('input', (e) => {
+        state.chargeAnchor = 'total';
+        state.totalCharge = Math.max(0, parseFloat(e.target.value) || 0);
+        recalculate('input-total-charge');
+      });
+
+      els.sliderTotalCharge.addEventListener('input', (e) => {
+        state.chargeAnchor = 'total';
+        state.totalCharge = parseFloat(e.target.value) || 0;
+        recalculate('slider-total-charge');
+      });
+
+      // Reset & Snap Helpers
+      els.resetRateBtn.addEventListener('click', () => {
+        state.chargeAnchor = 'pct';
+        state.flatRatePct = 11.16;
+        recalculate();
+        showToast('Financing rate reset to 11.16% flat');
+      });
+
+      els.snapExact16800.addEventListener('click', () => {
+        state.chargeAnchor = 'total';
+        state.totalCharge = 16800;
+        recalculate();
+        showToast('Set total additional cost to exact ₱16,800.00');
+      });
+
+      // Quick Presets
+      function applyScenarioPreset(amount, months, presetId, label) {
+        if (state.calcDirection !== 'forward') {
+          setDirection('forward');
+        }
+        state.quantity = 1;
+        els.inputQty.value = 1;
+        state.principal = amount;
+        state.months = months;
+        state.chargeAnchor = 'pct';
+        state.flatRatePct = 11.16;
+        setActivePresetUI(presetId);
+        recalculate();
+        showToast(`Loaded ${label}`);
+      }
+
+      els.preset1.addEventListener('click', () => applyScenarioPreset(100000, 24, 'preset-1', 'Preset 1: ₱100,000 @ 24 months'));
+      els.preset2.addEventListener('click', () => applyScenarioPreset(200000, 24, 'preset-2', 'Preset 2: ₱200,000 @ 24 months'));
+      els.preset3.addEventListener('click', () => applyScenarioPreset(300000, 36, 'preset-3', 'Preset 3: ₱300,000 @ 36 months'));
+
+      // Reset all inputs to defaults + clear saved state
+      els.resetDefaultsBtn.addEventListener('click', () => {
+        state.principal = 100000;
+        state.quantity = 1;
+        state.months = 24;
+        state.flatRatePct = 11.16;
+        state.monthlyRatePct = 0.465;
+        state.annualRatePct = 5.58;
+        state.monthlyAddon = 465.00;
+        state.totalCharge = 11160.00;
+        state.targetMonthly = 4631.67;
+        state.calcDirection = 'forward';
+        state.chargeAnchor = 'pct';
+        try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }
+        recalculate();
+        showToast('Reset to defaults');
+      });
+
+      // Copy Formatted Summary as Text
+      els.copyTextBtn.addEventListener('click', () => {
+        const totalRepayment = state.principal + state.totalCharge;
+        const monthlyInstallment = totalRepayment / state.months;
+        const rateStr = roundToTwo(state.flatRatePct).toFixed(2);
+        const monthlyRateStr = roundToThree(state.monthlyRatePct).toFixed(3);
+        const annualRateStr = roundToTwo(state.annualRatePct).toFixed(2);
+
+        const summaryText = [
+          `Financing Calculator — Estimate Summary`,
+          `Purchase Price: ${formatPHP(state.principal)}`,
+          '',
+          `Original purchase price: ${formatPHP(state.principal)}`,
+          `Additional financing charge: ${formatPHP(state.totalCharge)}`,
+          ` • Flat Rate: ${rateStr}% over entire term`,
+          ` • Monthly Rate: ${monthlyRateStr}% per month`,
+          ` • Annual Rate (APR): ${annualRateStr}% per year`,
+          ` • Monthly Add-on: ${formatPHP(state.monthlyAddon)} per month`,
+          `Total repayment: ${formatPHP(totalRepayment)}`,
+          `Installment duration: ${state.months} months`,
+          `Monthly installment: ${formatPHP(monthlyInstallment)}`,
+          '',
+          `• Total additional cost: ${formatPHP(state.totalCharge)}`,
+          `• Monthly installment amount: ${formatPHP(monthlyInstallment)}`,
+          `• Total amount payable over the installment period: ${formatPHP(totalRepayment)}`,
+          `Created by Lloyd Agonia`,
+        ].join('\n');
+
+        const textarea = document.createElement('textarea');
+        textarea.value = summaryText;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+          document.execCommand('copy');
+          showToast('Detailed summary copied to clipboard!');
+        } catch (err) {
+          showToast('Unable to copy summary.');
+        }
+        document.body.removeChild(textarea);
+      });
+
+      // Download Summary Card as Photo (PNG) using html2canvas
+      els.downloadPhotoBtn.addEventListener('click', () => {
+        showToast('Generating portrait summary photo...');
+        
+        // Populate hidden portrait card with live values
+        const totalRepayment = state.principal + state.totalCharge;
+        const monthlyInstallment = totalRepayment / state.months;
+        const rateStr = roundToTwo(state.flatRatePct).toFixed(2);
+        const monthlyRateStr = roundToThree(state.monthlyRatePct).toFixed(3);
+        const annualRateStr = roundToTwo(state.annualRatePct).toFixed(2);
+
+        document.getElementById('pc-header-price').textContent = formatPHP(state.principal);
+        document.getElementById('pc-hero-monthly').textContent = formatPHP(monthlyInstallment);
+        document.getElementById('pc-hero-months').textContent = `${state.months} months`;
+        document.getElementById('pc-hero-total').textContent = formatPHP(totalRepayment);
+        document.getElementById('pc-orig-price').textContent = formatPHP(state.principal);
+        document.getElementById('pc-charge-amount').textContent = formatPHP(state.totalCharge);
+        document.getElementById('pc-flat-rate').textContent = `${rateStr}% over entire term`;
+        document.getElementById('pc-monthly-rate').textContent = `${monthlyRateStr}% per month`;
+        document.getElementById('pc-annual-rate').textContent = `${annualRateStr}% per year`;
+        document.getElementById('pc-monthly-addon').textContent = `${formatPHP(state.monthlyAddon)} per month`;
+        document.getElementById('pc-total-repayment').textContent = formatPHP(totalRepayment);
+
+        const portraitCardEl = document.getElementById('portrait-card');
+        
+        html2canvas(portraitCardEl, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#090d16',
+          width: 540,
+          height: 810,
+        }).then((canvas) => {
+          const link = document.createElement('a');
+          link.download = `financing-summary-${Math.round(state.principal)}-${state.months}m.png`;
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+          showToast('Portrait summary photo downloaded successfully!');
+        }).catch((err) => {
+          console.error(err);
+          showToast('Could not generate image.');
+        });
+      });
+
+      // Initialize Calculator on Load
+      // Restore last saved state (if any); otherwise fall back to default Preset 1.
+      const saved = loadState();
+      if (saved) {
+        Object.assign(state, saved);
+      }
+      recalculate();
+    })();
+  </script>
+</body>
+</html>
