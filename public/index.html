@@ -1262,8 +1262,7 @@
         document.getElementById('pc-monthly-addon').textContent = `${formatPHP(state.monthlyAddon)} per month`;
         document.getElementById('pc-total-repayment').textContent = formatPHP(totalRepayment);
 
-        const portraitCardEl = document.getElementById('portrait-card');
-        
+        const portraitCardEl = document.getElementById('portrait-card');        
         html2canvas(portraitCardEl, {
           scale: 2,
           useCORS: true,
@@ -1271,11 +1270,20 @@
           width: 540,
           height: 810,
         }).then((canvas) => {
-          const link = document.createElement('a');
-          link.download = `financing-summary-${Math.round(state.principal)}-${state.months}m.png`;
-          link.href = canvas.toDataURL('image/png');
-          link.click();
-          showToast('Portrait summary photo downloaded successfully!');
+          // Convert canvas to a Blob (required for a reliable download on iOS)
+          canvas.toBlob((blob) => {
+            if (!blob) {
+              showToast('Could not generate image.');
+              return;
+            }
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.download = `financing-summary-${Math.round(state.principal)}-${state.months}m.png`;
+            link.href = url;
+            link.click();
+            URL.revokeObjectURL(url);
+            showToast('Portrait summary photo downloaded successfully!');
+          }, 'image/png');
         }).catch((err) => {
           console.error(err);
           showToast('Could not generate image.');
