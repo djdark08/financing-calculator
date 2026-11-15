@@ -728,6 +728,7 @@
         preset1: document.getElementById('preset-1'),
         preset2: document.getElementById('preset-2'),
         preset3: document.getElementById('preset-3'),
+        resetDefaultsBtn: document.getElementById('reset-defaults-btn'),
         resetRateBtn: document.getElementById('reset-rate-btn'),
         snapExact16800: document.getElementById('snap-exact-16800'),
         exportMenuBtn: document.getElementById('export-menu-btn'),
@@ -768,7 +769,7 @@
       }
 
       // Highlight active anchor card & update anchor label
-      function dateAnchorUI() {
+      function updateAnchorUI() {
         const activeBox = 'w-[150px] h-[126px] shrink-0 p-2.5 rounded-xl border-2 border-emerald-500 bg-emerald-50/30 transition flex flex-col justify-between overflow-hidden';
         const inactiveBox = 'w-[150px] h-[126px] shrink-0 p-2.5 rounded-xl border border-slate-200 bg-white hover:border-slate-300 transition flex flex-col justify-between overflow-hidden';
 
