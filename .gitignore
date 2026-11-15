@@ -2,3 +2,5 @@ node_modules/
 npm-debug.log*
 .DS_Store
 *.log
+# Node/wrangler build artifacts
+.wrangler/
