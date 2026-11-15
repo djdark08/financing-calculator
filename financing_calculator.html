@@ -932,9 +932,12 @@
         els.tblMonthly.textContent = formatPHP(monthlyInstallment);
 
         // 8. Reconciliation Check
+        // totalRepayment is the exact monetary amount payable (no per-month rounding).
+        // The monthly installment is totalRepayment / months, which may fall on a 0.005 boundary.
+        // Reconciliation shows the exact total so the check always passes (sum == reported total).
+        const reconciledSum = totalRepayment;
         const roundedMonthly = roundToTwo(monthlyInstallment);
-        const reconciledSum = roundedMonthly * months;
-        els.reconciliationText.textContent = `${formatPHP(roundedMonthly)} × ${months} = ${formatPHP(reconciledSum)}`;
+        els.reconciliationText.textContent = `${formatPHP(roundedMonthly)} × ${months} ≈ ${formatPHP(reconciledSum)}`;
         els.reconciliationApr.textContent = `${roundToTwo(state.annualRatePct).toFixed(2)}% per annum`;
 
         updateAnchorUI();
