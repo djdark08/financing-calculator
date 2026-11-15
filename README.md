@@ -93,13 +93,13 @@ The site is static; no API or database is needed. The deployment injects the
 
 ## Screenshots
 
-The screenshots below were captured from the deployed calculator at
-`https://site-f0478a2ff41c4a889d1b4c5b2086477b.freebuff.page/`. Use them as a visual
-reference for the UI; the app runs exactly the same locally.
+The screenshots below are stored in the `images/` folder at the root of this
+repository. Use them as a visual reference for the UI; the app runs exactly the
+same locally.
 
 ### Calculator UI (with summary card, breakdown table, and Save Photo button)
 
-![Calculator UI with summary card, breakdown table, and Save Photo button](financing_Calculator_UI.png)
+![Calculator UI with summary card, breakdown table, and Save Photo button](images/financing_Calculator_UI.png)
 
 The main layout is a two-column dashboard:
 
@@ -115,7 +115,7 @@ The main layout is a two-column dashboard:
 
 ### Portrait summary export card (Save Photo output)
 
-![Portrait summary export card](financing-Card.png)
+![Portrait summary export card](images/financing-Card.png)
 
 This is the 540x810 portrait card that the “Save Photo” button renders and downloads.
 It contains the estimate summary with:
@@ -126,9 +126,8 @@ It contains the estimate summary with:
 - The per-mode rates in an indented list so the user can see which charge mode is
   active and what each equivalent rate equals.
 
-Both screenshots were taken from the deployed site; they reflect the current,
-fully working build. If you prefer, replace them with your own captures at any
-state or preset.
+Both screenshots are stored in the `images/` folder. If you prefer, replace them
+with your own captures at any state or preset.
 
 ## Notes for use
 
