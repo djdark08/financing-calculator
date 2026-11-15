@@ -1270,19 +1270,32 @@
           width: 540,
           height: 810,
         }).then((canvas) => {
-          // Convert canvas to a Blob (required for a reliable download on iOS)
+          // Convert canvas to a Blob (required for a reliable download/
+          // save on iOS, which blocks plain data: URLs and <a download>).
           canvas.toBlob((blob) => {
             if (!blob) {
               showToast('Could not generate image.');
               return;
             }
             const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.download = `financing-summary-${Math.round(state.principal)}-${state.months}m.png`;
-            link.href = url;
-            link.click();
-            URL.revokeObjectURL(url);
-            showToast('Portrait summary photo downloaded successfully!');
+            const name = `financing-summary-${Math.round(state.principal)}-${state.months}m.png`;
+
+            // Try the iOS-native share/save sheet first (lets the user save the
+            // PNG straight to Files). Falls back to <a download> when unsupported.
+            if (navigator.canShare && navigator.canShare({ files: [{ uri: url, type: 'image/png', name }] })) {
+              navigator
+                .share({ files: [{ uri: url, type: 'image/png', name }] })
+                .catch(() => {
+                  // User cancelled the sheet; do nothing further.
+                });
+            } else {
+              const link = document.createElement('a');
+              link.download = name;
+              link.href = url;
+              link.click();
+              URL.revokeObjectURL(url);
+              showToast('Portrait summary photo downloaded successfully!');
+            }
           }, 'image/png');
         }).catch((err) => {
           console.error(err);
